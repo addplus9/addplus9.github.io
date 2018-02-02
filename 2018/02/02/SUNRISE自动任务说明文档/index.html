@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="自动任务," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="1.    CTP账号信息查询任务任务名: CTPAccountQryJobRunner 执行节点：sanber_lts_TaskTracker 使用场景： 新建账号时开启任务,修改账号时更新任务 描述：为SUNRISE新建基金账户时，需要一个在交易所已经建好的账户，将该账户号填入SUNRISE系统后，SUNRISE将会向交易所提供的接口查询该账户相关信息–CThostFtdcTradingAcc">
+<meta name="keywords" content="自动任务">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SUNRISE自动任务说明文档">
+<meta property="og:url" content="http://yoursite.com/2018/02/02/SUNRISE自动任务说明文档/index.html">
+<meta property="og:site_name" content="蓝樾博客">
+<meta property="og:description" content="1.    CTP账号信息查询任务任务名: CTPAccountQryJobRunner 执行节点：sanber_lts_TaskTracker 使用场景： 新建账号时开启任务,修改账号时更新任务 描述：为SUNRISE新建基金账户时，需要一个在交易所已经建好的账户，将该账户号填入SUNRISE系统后，SUNRISE将会向交易所提供的接口查询该账户相关信息–CThostFtdcTradingAcc">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-02-02T09:17:45.187Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SUNRISE自动任务说明文档">
+<meta name="twitter:description" content="1.    CTP账号信息查询任务任务名: CTPAccountQryJobRunner 执行节点：sanber_lts_TaskTracker 使用场景： 新建账号时开启任务,修改账号时更新任务 描述：为SUNRISE新建基金账户时，需要一个在交易所已经建好的账户，将该账户号填入SUNRISE系统后，SUNRISE将会向交易所提供的接口查询该账户相关信息–CThostFtdcTradingAcc">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/02/02/SUNRISE自动任务说明文档/"/>
+
+
+
+
+
+  <title>SUNRISE自动任务说明文档 | 蓝樾博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">蓝樾博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/02/SUNRISE自动任务说明文档/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="addplus9">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝樾博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">SUNRISE自动任务说明文档</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-02T16:01:16+08:00">
+                2018-02-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h5 id="1-CTP账号信息查询任务"><a href="#1-CTP账号信息查询任务" class="headerlink" title="1.    CTP账号信息查询任务"></a>1.    CTP账号信息查询任务</h5><p>任务名: CTPAccountQryJobRunner</p>
+<p>执行节点：sanber_lts_TaskTracker</p>
+<p>使用场景： 新建账号时开启任务,修改账号时更新任务</p>
+<p>描述：为SUNRISE新建基金账户时，需要一个在交易所已经建好的账户，将该账户号填入SUNRISE系统后，SUNRISE将会向交易所提供的接口查询该账户相关信息–CThostFtdcTradingAccountField，业务中我们将该对象信息处理成XbCTPAccountInfo。由于基金价格的实时变动，导致以价格为基准的账户中其他信息比如持仓盈亏，权益等会实时变动，所以需要开启一个自动任务，让系统每秒去交易所获取账户信息，然后存入redis，以备系统需要时快速取得数据。<br>调用图例:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line"></span><br><span class="line">    A[前端] --&gt;|频繁调用| B&#123;addplus_web&#125;</span><br><span class="line">    B --&gt;|频繁读取| C(redis)</span><br><span class="line">    B --&gt;|开启任务| D(lts)</span><br><span class="line">    D --&gt;|频繁写入| C(redis)</span><br></pre></td></tr></table></figure>
+<p>代码位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sanber_web模块--&gt;src--&gt;main--&gt;java--&gt;lts--&gt;taskTracker--&gt;ctpqryjobrunner--&gt;CTPAccountQryjobRunner</span><br></pre></td></tr></table></figure></p>
+<p>关联数据库: xb_account<br>获取对象字段: XbCTPAccountInfo<br>循环执行间隔: 1s<br>实际业务哪些功能用到了该任务: 增加、修改期货账号时。<br>调用CTP接口:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int qryTradingAccount = transactionAction.reqQryTradingAccount(futurnId,0);</span><br></pre></td></tr></table></figure>
+<p>查询回调函数:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *投资者信息确认回调</span><br><span class="line"> */</span><br><span class="line">@Override</span><br><span class="line">public void onRspQryTradingAccount(String accountId, CThostFtdcTradingAccountField cThostFtdcTradingAccountField, CThostFtdcRspInfoField cThostFtdcRspInfoField, Integer integer, Boolean aBoolean) &#123;</span><br><span class="line">    if(cThostFtdcRspInfoField.getErrorID() != 0)&#123;</span><br><span class="line">        logger.error(&quot;CTP交易账号查询失败,失败码:&quot;+cThostFtdcRspInfoField.getErrorID()+&quot;;失败原因:&quot;+cThostFtdcRspInfoField.getErrorMsg());</span><br><span class="line">    &#125;else&#123;</span><br><span class="line"></span><br><span class="line">        #将账号信息录入更新redis</span><br><span class="line">        ctpTradeOrderService.reqAccount(cThostFtdcTradingAccountField);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>任务调用参考:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">//查询账号任务</span><br><span class="line">Job job = new Job();</span><br><span class="line">//期货账号+_CTPAccountQryJobRunner</span><br><span class="line">job.setTaskId(account.getAccount()+&quot;_CTPAccountQryJobRunner&quot;);</span><br><span class="line">// 循环执行时间参数</span><br><span class="line">job.setCronExpression(&quot;0/1 * * * * ?&quot;);</span><br><span class="line">Map&lt;String,String&gt; map = new HashMap&lt;&gt;();</span><br><span class="line">map.put(&quot;beanName&quot;,&quot;CTPAccountQryJobRunner&quot;);</span><br><span class="line">map.put(&quot;futurnId&quot;,account.getAccount());</span><br><span class="line">job.setExtParams(map);</span><br><span class="line">job.setRelyOnPrevCycle(true);</span><br><span class="line">jobClientHandle.addClient(job);</span><br></pre></td></tr></table></figure></p>
+<p>关闭：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jobClientHandle.deleteClient(account.getAccount()+&quot;_CTPAccountQryJobRunner&quot;);</span><br></pre></td></tr></table></figure>
+<h5 id="2-持仓查询任务"><a href="#2-持仓查询任务" class="headerlink" title="2. 持仓查询任务"></a>2. 持仓查询任务</h5><p>任务名: CTPPositionQryJobRunner</p>
+<p>执行节点：sanber_lts_TaskTracker</p>
+<p>使用场景： 新建账号时开启任务,修改账号时更新任务</p>
+<p>描述：SUNRISE系统中的账户持仓情况，任务获取数据后组装成XbCTPPosition存入redis\<br>代码位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sanber_web模块--&gt;src--&gt;main--&gt;java--&gt;lts--&gt;taskTracker--&gt;ctpqryjobrunner--&gt;CTPPositionQryJobRunner</span><br></pre></td></tr></table></figure></p>
+<p>关联数据库:<br>查询字段:<br>循环执行间隔: 1s<br>实际业务哪些功能用到了该任务: 增加、修改期货账号时。<br>调用CTP接口:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int res = transactionAction.reqQryInvestorPosition(futurnId,0);</span><br></pre></td></tr></table></figure></p>
+<p>CTP查询回调：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *请求查询投资者持仓回调</span><br><span class="line"> */</span><br><span class="line">@Override</span><br><span class="line">public void onRspQryInvestorPosition(String accountId, CThostFtdcInvestorPositionField cThostFtdcInvestorPositionField, CThostFtdcRspInfoField cThostFtdcRspInfoField, Integer integer, Boolean aBoolean) &#123;</span><br><span class="line">    if(cThostFtdcRspInfoField.getErrorID() != 0)&#123;</span><br><span class="line">        logger.error(&quot;CTP交易持仓查询失败,失败码:&quot;+cThostFtdcRspInfoField.getErrorID()+&quot;;失败原因:&quot;+cThostFtdcRspInfoField.getErrorMsg());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /****************************将持仓录入更新redis*********************************/</span><br><span class="line">    if(StringUtils.isNotBlank(cThostFtdcInvestorPositionField.getInvestorID())</span><br><span class="line">            &amp;&amp;StringUtils.isNotBlank(cThostFtdcInvestorPositionField.getInstrumentID()))&#123;</span><br><span class="line">        ctpTradeOrderService.onRspQryInvestorPositionBack(cThostFtdcInvestorPositionField,aBoolean);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>任务调用参考：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">//查询持仓任务</span><br><span class="line">job = new Job();</span><br><span class="line">job.setTaskId(account.getAccount()+&quot;_CTPPositionQryJobRunner&quot;);</span><br><span class="line">job.setCronExpression(&quot;0/1 * * * * ?&quot;);</span><br><span class="line">map = new HashMap&lt;&gt;();</span><br><span class="line">map.put(&quot;beanName&quot;,&quot;CTPPositionQryJobRunner&quot;);</span><br><span class="line">map.put(&quot;futurnId&quot;,account.getAccount());</span><br><span class="line">job.setExtParams(map);</span><br><span class="line">job.setRelyOnPrevCycle(true);</span><br><span class="line">jobClientHandle.addClient(job);</span><br></pre></td></tr></table></figure>
+<p>关闭：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jobClientHandle.deleteClient(account.getAccount()+&quot;_CTPPositionQryJobRunner&quot;);</span><br></pre></td></tr></table></figure>
+<h5 id="3-预埋单（委托单）查询任务"><a href="#3-预埋单（委托单）查询任务" class="headerlink" title="3.    预埋单（委托单）查询任务"></a>3.    预埋单（委托单）查询任务</h5><p>任务名: CTPParkedOrderQryJobRunner</p>
+<p>执行节点：sanber_lts_TaskTracker</p>
+<p>使用场景： 新建账号时开启任务,修改账号时更新任务</p>
+<p>描述：<br>代码位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sanber_web模块--&gt;src--&gt;main--&gt;java--&gt;lts--&gt;taskTracker--&gt;ctpqryjobrunner--&gt;CTPParkedOrderQryJobRunner</span><br></pre></td></tr></table></figure></p>
+<p>关联数据库:<br>查询字段:<br>循环执行间隔: 每天9，10，14，22点的1，15，30分执行。<br>实际业务哪些功能用到了该任务: 增加、修改期货账号时。<br>调用CTP接口:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int res=transactionAction.reqQryParkedOrder(futurnId,null,0);</span><br></pre></td></tr></table></figure></p>
+<p>CTP回调：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 委托单报单回报</span><br><span class="line"> */</span><br><span class="line">@Override</span><br><span class="line">public void onRspOrderInsert(String s, CThostFtdcInputOrderField cThostFtdcInputOrderField, CThostFtdcRspInfoField cThostFtdcRspInfoField, Integer integer, Boolean aBoolean) &#123;</span><br><span class="line">    if(StringUtils.isNotBlank(cThostFtdcInputOrderField.getAccountID()))&#123;</span><br><span class="line">        ctpTradeOrderService.onRspOrderInsertBack(cThostFtdcInputOrderField,cThostFtdcRspInfoField);</span><br><span class="line">        if(cThostFtdcRspInfoField.getErrorID() != 0)&#123;</span><br><span class="line">            logger.error(&quot;报单录入错误&quot;+cThostFtdcRspInfoField.getErrorMsg()+&quot;账号：&quot;+cThostFtdcInputOrderField.getAccountID()</span><br><span class="line">                            +&quot;合约: &quot;+cThostFtdcInputOrderField.getInstrumentID());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * 委托单操作回报</span><br><span class="line"> */</span><br><span class="line">@Override</span><br><span class="line">public void onRspOrderAction(String s, CThostFtdcInputOrderActionField cThostFtdcInputOrderActionField, CThostFtdcRspInfoField cThostFtdcRspInfoField, Integer integer, Boolean aBoolean) &#123;</span><br><span class="line">    if(StringUtils.isNotBlank(cThostFtdcInputOrderActionField.getInvestorID()))&#123;</span><br><span class="line">        ctpTradeOrderService.onRspOrderAction(cThostFtdcInputOrderActionField,cThostFtdcRspInfoField);</span><br><span class="line">        if(cThostFtdcRspInfoField.getErrorID() != 0)&#123;</span><br><span class="line">            logger.error(&quot;撤单录入错误&quot;+cThostFtdcRspInfoField.getErrorMsg()+&quot;账号：&quot;+cThostFtdcInputOrderActionField.getInvestorID()</span><br><span class="line">                    +&quot;合约: &quot;+cThostFtdcInputOrderActionField.getInstrumentID());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用参考：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">//查询委托单任务</span><br><span class="line">job = new Job();</span><br><span class="line">job.setTaskId(account.getAccount()+&quot;_CTPParkedOrderQryJobRunner&quot;);</span><br><span class="line">job.setCronExpression(&quot;1 1,15,30 9,10,14,22 * * ? &quot;);</span><br><span class="line">map = new HashMap&lt;&gt;();</span><br><span class="line">map.put(&quot;beanName&quot;,&quot;CTPParkedOrderQryJobRunner&quot;);</span><br><span class="line">map.put(&quot;futurnId&quot;,account.getAccount());</span><br><span class="line">job.setExtParams(map);</span><br><span class="line">job.setRelyOnPrevCycle(true);</span><br><span class="line">jobClientHandle.updateClient(job);</span><br></pre></td></tr></table></figure>
+<p>关闭：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jobClientHandle.deleteClient(account.getAccount()+&quot;_CTPParkedOrderQryJobRunner&quot;);</span><br></pre></td></tr></table></figure>
+<h5 id="4-CTP交易信息确认任务"><a href="#4-CTP交易信息确认任务" class="headerlink" title="4. CTP交易信息确认任务"></a>4. CTP交易信息确认任务</h5><p>任务名: CTPReqSettlementInfoConfirmJobRunner</p>
+<p>执行节点：sanber_lts_TaskTracker</p>
+<p>使用场景： 新建账号时开启任务,修改账号时更新任务</p>
+<p>描述：每天固定时间点进行一次确认。为什么不是交易完成马上确认？？？<br>代码位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sanber_web模块--&gt;src--&gt;main--&gt;java--&gt;lts--&gt;taskTracker--&gt;ctpqryjobrunner--&gt;CTPReqSettlementInfoConfirmJobRunner</span><br></pre></td></tr></table></figure></p>
+<p>关联数据库:<br>查询字段:<br>循环执行间隔: 每天8:00:00 12:00:00 20:00:00执行<br>实际业务哪些功能用到了该任务: 增加、修改期货账号时。<br>调用CTP接口:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int res=transactionAction.reqSettlementInfoConfirm(futurnId,0);</span><br></pre></td></tr></table></figure></p>
+<p>CTP回调：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *信息确认回调</span><br><span class="line"> */</span><br><span class="line">@Override</span><br><span class="line">public void onRspSettlementInfoConfirm(String accountId, CThostFtdcSettlementInfoConfirmField cThostFtdcSettlementInfoConfirmField, CThostFtdcRspInfoField cThostFtdcRspInfoField, Integer integer, Boolean aBoolean) &#123;</span><br><span class="line">    if(cThostFtdcRspInfoField.getErrorID() != 0)&#123;</span><br><span class="line">        logger.error(&quot;CTP交易信息确认失败,失败ID====&gt;&quot;+accountId+&quot;;失败原因====&gt;&quot;+cThostFtdcRspInfoField.getErrorMsg());</span><br><span class="line">    &#125;else&#123;</span><br><span class="line"></span><br><span class="line">        logger.info(&quot;CTP交易信息确认成功,确认ID====&gt;&quot;+accountId);</span><br><span class="line">        transactionAction.reqQryInstrument(accountId,0);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用参考：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">//每天确认信息</span><br><span class="line">job = new Job();</span><br><span class="line">job.setTaskId(account.getAccount()+&quot;_CTPReqSettlementInfoConfirmJobRunner&quot;);</span><br><span class="line">job.setCronExpression(&quot;0 0 8,12,20 * * ?&quot;);</span><br><span class="line">map = new HashMap&lt;&gt;();</span><br><span class="line">map.put(&quot;beanName&quot;,&quot;CTPReqSettlementInfoConfirmJobRunner&quot;);</span><br><span class="line">map.put(&quot;futurnId&quot;,account.getAccount());</span><br><span class="line">job.setExtParams(map);</span><br><span class="line">job.setRelyOnPrevCycle(true);</span><br><span class="line">jobClientHandle.updateClient(job);</span><br></pre></td></tr></table></figure></p>
+<p>关闭：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jobClientHandle.deleteClient(account.getAccount()+&quot;_CTPReqSettlementInfoConfirmJobRunner&quot;);</span><br></pre></td></tr></table></figure>
+<h5 id="5-每天删除当天工作和预埋单"><a href="#5-每天删除当天工作和预埋单" class="headerlink" title="5. 每天删除当天工作和预埋单"></a>5. 每天删除当天工作和预埋单</h5><p>任务名: CTPDayDeleteAllOrderAndTrade</p>
+<p>执行节点：sanber_lts_TaskTracker</p>
+<p>使用场景： 新建账号时开启任务,修改账号时更新任务</p>
+<p>描述：每天凌晨五点删除redis中存储的订单和交易信息<br>代码位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sanber_web模块--&gt;src--&gt;main--&gt;java--&gt;lts--&gt;taskTracker--&gt;ctpqryjobrunner--&gt;CTPDayDeleteAllOrderAndTrade</span><br></pre></td></tr></table></figure></p>
+<p>关联数据库:<br>查询字段:<br>循环执行间隔: 每天5：00：00点执行一次<br>实际业务哪些功能用到了该任务: 增加、修改期货账号时。<br>任务核心代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ctpRedisUtil.deleteAllOrderAndTrade();</span><br></pre></td></tr></table></figure></p>
+<p>调用参考：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">//每天删除报单和成交记录</span><br><span class="line">job = new Job();</span><br><span class="line">job.setTaskId(account.getAccount()+&quot;_CTPDayDeleteAllOrderAndTrade&quot;);</span><br><span class="line">job.setCronExpression(&quot;0 0 5 * * ? &quot;);</span><br><span class="line">map = new HashMap&lt;&gt;();</span><br><span class="line">map.put(&quot;beanName&quot;,&quot;CTPDayDeleteAllOrderAndTrade&quot;);</span><br><span class="line">map.put(&quot;futurnId&quot;,account.getAccount());</span><br><span class="line">job.setExtParams(map);</span><br><span class="line">job.setRelyOnPrevCycle(true);</span><br><span class="line">jobClientHandle.updateClient(job);</span><br></pre></td></tr></table></figure>
+<p>关闭：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jobClientHandle.deleteClient(account.getAccount()+&quot;_CTPDayDeleteAllOrderAndTrade&quot;);</span><br></pre></td></tr></table></figure></p>
+<h5 id="6-期货账号风控监控数据存入redis"><a href="#6-期货账号风控监控数据存入redis" class="headerlink" title="6.期货账号风控监控数据存入redis"></a>6.期货账号风控监控数据存入redis</h5><p>任务名: SanberRiskDataPositionJobRunner</p>
+<p>执行节点：sanber_lts_TaskTracker</p>
+<p>使用场景： 项目启动时开启任务</p>
+<p>描述：通过账户的持仓等信息计算出各项参数，组装成CTPRiskManager转成hashMap存入redis。<br>代码位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sanber_web模块--&gt;src--&gt;main--&gt;java--&gt;lts--&gt;taskTracker--&gt;ctpriskjobrunner--&gt;SanberRiskDataPositionJobRunner</span><br></pre></td></tr></table></figure></p>
+<p>关联数据库: CTP账号信息–xb_account<br>查询字段:<br>循环执行间隔: 1min<br>实际业务哪些功能用到了该任务: 持仓设置，消息报警。<br>redis存储的key:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redisTemplate.opsForHash().putAll(StringConstant.CTP_RISK_MANAGERT_DATA + xbAccount.getId(), map);</span><br></pre></td></tr></table></figure></p>
+<p>调用参考：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">//提交期货账号风控监控数据存入redis</span><br><span class="line">Job job = new Job();</span><br><span class="line">job.setTaskId(&quot;SanberRiskDataPositionJobRunner&quot;);</span><br><span class="line">job.setCronExpression(&quot;1 * * * * ?&quot;);</span><br><span class="line">Map&lt;String,String&gt; map = new HashMap&lt;&gt;();</span><br><span class="line">map.put(&quot;beanName&quot;,&quot;SanberRiskDataPositionJobRunner&quot;);</span><br><span class="line">job.setExtParams(map);</span><br><span class="line">job.setRelyOnPrevCycle(false);</span><br><span class="line">jobClientHandle.addClient(job);</span><br></pre></td></tr></table></figure>
+<p>关闭：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">```</span><br><span class="line">##### 7.风控设置-资金监控定时类</span><br><span class="line">任务名: SanberRiskFundJobRunner</span><br><span class="line"></span><br><span class="line">执行节点：sanber_lts_TaskTracker</span><br><span class="line"></span><br><span class="line">使用场景： 项目启动时开启任务</span><br><span class="line">描述：从redis中取风控监控数据和针对该账号的**资金设置**预警数据作对比，触发报警则向前台发送一条提示消息；涉及两个重要对象：CTPRiskManager--风险管理数据包装实体类，是根据账户实时数据组装成的对象；XbAccountRisk--设定的账户各风控值实体类，是设定好的各风控值。报警触发条件有：availableFunds--账户可用资金比例小于等于风控设定值；leverageRatio--账户杆杆率大于风控设定值；varRatio--账户VAR风险率大于风控设定值；targetDamnify--账户止损值比例大于风控设定值。</span><br><span class="line">代码位置：</span><br></pre></td></tr></table></figure>
+<p>sanber_web模块–&gt;src–&gt;main–&gt;java–&gt;lts–&gt;taskTracker–&gt;ctpriskjobrunner–&gt;SanberRiskFundJobRunner<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">关联数据库: </span><br><span class="line">查询字段: </span><br><span class="line">循环执行间隔: 1min</span><br><span class="line">实际业务哪些功能用到了该任务: 持仓设置，报警。</span><br><span class="line">调用参考:</span><br></pre></td></tr></table></figure></p>
+<p>//风控资金设置监控任务<br>job = new Job();<br>job.setTaskId(“SanberRiskFundJobRunner”);<br>job.setCronExpression(“1 <em> </em> <em> </em> ?”);<br>map = new HashMap&lt;&gt;();<br>map.put(“beanName”,”SanberRiskFundJobRunner”);<br>job.setExtParams(map);<br>job.setRelyOnPrevCycle(false);<br>jobClientHandle.addClient(job);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">关闭:</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">##### 8.风控管理-持仓监控定时任务</span><br><span class="line">任务名: SanberRiskPositionJobRunner</span><br><span class="line"></span><br><span class="line">执行节点：sanber_lts_TaskTracker</span><br><span class="line"></span><br><span class="line">使用场景： 项目启动时开启任务。</span><br><span class="line"></span><br><span class="line">描述：和上一条任务一样是对账户的持仓设置监控报警，涉及CTPRiskManager、XbAccountRisk、XbRiskProduct--风控持仓产品信息类、XbRiskLevel--风控等级信息类等对象。报警条件：totalPositionLimit--账户总仓位上限大于等于设定值；netEquityPositionLimit--账户净持仓上限大于等于设定值；positionTopLimit--单品持仓上限大于等于设定值；tPositionRatio--日内持仓保证金占计划净值比例高于设定值；oPositionRatio--隔夜持仓保证金占计划净值比例高于设定值；sPositionRatio--单品种持仓保证金占计划净值比例。</span><br><span class="line"></span><br><span class="line">代码位置：</span><br></pre></td></tr></table></figure>
+<p>sanber_web模块–&gt;src–&gt;main–&gt;java–&gt;lts–&gt;taskTracker–&gt;ctpriskjobrunner–&gt;SanberRiskPositionJobRunner<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">关联数据库: 相变系统账户表--xb_account、相变风控信息表--xb_account_risk、相变风控等级信息表--xb_risk_level、相变风控持仓产品信息表--xb_risk_product</span><br><span class="line">查询字段: </span><br><span class="line">循环执行间隔: 1min</span><br><span class="line">实际业务哪些功能用到了该任务: 持仓设置，消息推送。</span><br><span class="line">调用参考：</span><br></pre></td></tr></table></figure></p>
+<p>//风控仓位监控任务<br>job = new Job();<br>job.setTaskId(“SanberRiskPositionJobRunner”);<br>job.setCronExpression(“1 <em> </em> <em> </em> ?”);<br>map = new HashMap&lt;&gt;();<br>map.put(“beanName”,”SanberRiskPositionJobRunner”);<br>job.setExtParams(map);<br>job.setRelyOnPrevCycle(false);<br>jobClientHandle.addClient(job);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">关闭：</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">##### 9.风控策略监测定时任务</span><br><span class="line">任务名: SanberRiskStrategyJobRunner</span><br><span class="line"></span><br><span class="line">执行节点：sanber_lts_TaskTracker</span><br><span class="line"></span><br><span class="line">使用场景： 项目启动时开启任务</span><br><span class="line"></span><br><span class="line">描述：和上一条任务一样是对账户的策略监控报警，涉及类：XbStrategyTradeDetails--策略持仓行情详情、CTPMarketData--行情数据类、XbStrategyPosition--策略详情信息类 等对象。报警条件：targetProfit--目标止盈值小于当前盈利；targetDamnify--目标止损值为负。</span><br><span class="line"></span><br><span class="line">代码位置：</span><br></pre></td></tr></table></figure>
+<p>sanber_web模块–&gt;src–&gt;main–&gt;java–&gt;lts–&gt;taskTracker–&gt;ctpriskjobrunner–&gt;SanberRiskStrategyJobRunner<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">关联数据库:策略持仓行情详情表--xb_strategy_trade_details、策略详情信息表--xb_strategy_position、 相变系统账户表--xb_account、相变风控信息表--xb_account_risk、相变风控等级信息表--xb_risk_level、相变风控持仓产品信息表--xb_risk_product</span><br><span class="line">查询字段: </span><br><span class="line">循环执行间隔: 1min</span><br><span class="line">实际业务哪些功能用到了该任务: 持仓设置，消息推送。</span><br><span class="line">调用参考：</span><br></pre></td></tr></table></figure></p>
+<p>//风控策略任务<br>job = new Job();<br>job.setTaskId(“SanberRiskStrategyJobRunner”);<br>job.setCronExpression(“1 <em> </em> <em> </em> ?”);<br>map = new HashMap&lt;&gt;();<br>map.put(“beanName”,”SanberRiskStrategyJobRunner”);<br>job.setExtParams(map);<br>job.setRelyOnPrevCycle(false);<br>jobClientHandle.addClient(job);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">关闭：</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">##### 10.报表统计-交易报表</span><br><span class="line">任务名: SanberTradeReportJobRunner</span><br><span class="line"></span><br><span class="line">执行节点：sanber_lts_TaskTracker</span><br><span class="line"></span><br><span class="line">使用场景：项目启动时启动任务。</span><br><span class="line">描述：交易报表，报表信息主要通过（List&lt;CTPRspQryTrade&gt; qryTradeList = ctpRedisUtil.getAllCTPTrade(accountInfo.getAccountID());）获得；涉及类：XbCTPAccountInfo--CTP账号信息、CTPRspQryTrade--账号成交记录、CTPRspQryOrder--CTP报单、XbFuturesInstrument--期货合约数据类</span><br><span class="line"></span><br><span class="line">代码位置：</span><br></pre></td></tr></table></figure>
+<p>sanber_web模块–&gt;src–&gt;main–&gt;java–&gt;lts–&gt;taskTracker–&gt;ctpreportjobrunner–&gt;SanberTradeReportJobRunner<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">关联数据库:交易日期--xb_futures_trade_date、期货合约数据表--xb_futures_instrument。</span><br><span class="line">查询字段: </span><br><span class="line">循环执行间隔: </span><br><span class="line">实际业务哪些功能用到了该任务: 交易报表。</span><br><span class="line"></span><br><span class="line">调用参考：</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">关闭：</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">##### 11.报表统计-风控报表</span><br><span class="line">任务名: SanberRiskReportJobRunner</span><br><span class="line"></span><br><span class="line">执行节点：sanber_lts_TaskTracker</span><br><span class="line"></span><br><span class="line">使用场景：项目启动时启动任务。</span><br><span class="line">描述：账户风控报表，关键是利用持仓信息（List&lt;XbCTPPosition&gt; positionList = ctpRedisUtil.getCTPPosition(accountId);）和所有成交单（List&lt;CTPRspQryTrade&gt; qryTradeList = ctpRedisUtil.getAllCTPTrade(accountId);）的信息。涉及类：XbCTPAccountInfo--CTP账号信息、XbReportRisk--风险控制类、XbAccount--账号信息类、CTPRspQryOrder--CTP报单、CTPRspQryOrder--CTP报单、XbFuturesInstrument--期货合约数据类</span><br><span class="line"></span><br><span class="line">代码位置：</span><br></pre></td></tr></table></figure>
+<p>sanber_web模块–&gt;src–&gt;main–&gt;java–&gt;lts–&gt;taskTracker–&gt;ctpreportjobrunner–&gt;SanberRiskReportJobRunner<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">关联数据库:交易日期--xb_futures_trade_date、风险控制报表--xb_report_risk、交易报表--xb_report_trade、</span><br><span class="line">查询字段: </span><br><span class="line">循环执行间隔: </span><br><span class="line">实际业务哪些功能用到了该任务: 交易报表。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">调用参考：</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">关闭：</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">##### 12.定时更新主力合约任务</span><br><span class="line">任务名: CTPUpdateZLInstrumentJobRunner</span><br><span class="line"></span><br><span class="line">执行节点：sanber_lts_TaskTracker</span><br><span class="line"></span><br><span class="line">使用场景：启动后台时开启定时任务</span><br><span class="line"></span><br><span class="line">描述：通过合约数据（final List&lt;XbFuturesInstrument&gt; list = ctpRedisUtil.getAllInstrumentData();）和行情数据（final Map&lt;String,CTPMarketData&gt; marketDataMap = ctpRedisUtil.getAllMarketMap();）获得数据</span><br><span class="line">代码位置：</span><br></pre></td></tr></table></figure>
+<p>sanber_web模块–&gt;src–&gt;main–&gt;java–&gt;lts–&gt;taskTracker–&gt;ctpqryjobrunner–&gt;CTPUpdateZLInstrumentJobRunner<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">关联数据库:期货合约表--xb_futures_instrument</span><br><span class="line">查询字段: </span><br><span class="line">循环执行间隔: 主力合约任务每天10：01：01、15：01：01、22：01：01执行，更新合约数据每月1号00：01：01执行</span><br><span class="line">实际业务哪些功能用到了该任务: redis更新主力合约</span><br><span class="line"></span><br><span class="line">调用参考：</span><br></pre></td></tr></table></figure></p>
+<p>//更新合约数据任务<br>Job job = new Job();<br>job.setTaskId(“CTPInstrumentQryJobRunner”);<br>job.setCronExpression(“1 1 0 1 <em> ? “);<br>Map<string,string> map = new HashMap&lt;&gt;();<br>map.put(“beanName”,”CTPUpdateZLInstrumentJobRunner”);<br>map.put(“futurnId”,”110702”);<br>job.setExtParams(map);<br>job.setRelyOnPrevCycle(false);<br>jobClientHandle.addClient(job);<br>//更新主力合约任务<br>job = new Job();<br>job.setTaskId(“CTPUpdateZLInstrumentJobRunner”);<br>job.setCronExpression(“1 1 10,15,22 </string,string></em> * ? “);<br>map = new HashMap&lt;&gt;();<br>map.put(“beanName”,”CTPUpdateZLInstrumentJobRunner”);<br>job.setExtParams(map);<br>job.setRelyOnPrevCycle(false);<br>jobClientHandle.addClient(job);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">关闭：</span><br></pre></td></tr></table></figure></p>
+<p>```</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/自动任务/" rel="tag"># 自动任务</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/02/SUNRISE项目生产环境搭建及前后端部署/" rel="next" title="SUNRISE项目生产环境搭建及前后端部署">
+                <i class="fa fa-chevron-left"></i> SUNRISE项目生产环境搭建及前后端部署
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/02/Redis缓存说明文档/" rel="prev" title="Redis缓存说明文档">
+                Redis缓存说明文档 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">addplus9</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-CTP账号信息查询任务"><span class="nav-number">1.</span> <span class="nav-text">1.    CTP账号信息查询任务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-持仓查询任务"><span class="nav-number">2.</span> <span class="nav-text">2. 持仓查询任务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-预埋单（委托单）查询任务"><span class="nav-number">3.</span> <span class="nav-text">3.    预埋单（委托单）查询任务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-CTP交易信息确认任务"><span class="nav-number">4.</span> <span class="nav-text">4. CTP交易信息确认任务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-每天删除当天工作和预埋单"><span class="nav-number">5.</span> <span class="nav-text">5. 每天删除当天工作和预埋单</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6-期货账号风控监控数据存入redis"><span class="nav-number">6.</span> <span class="nav-text">6.期货账号风控监控数据存入redis</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">addplus9</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

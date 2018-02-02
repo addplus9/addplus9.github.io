@@ -229,6 +229,610 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/02/Redis缓存说明文档/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="addplus9">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝樾博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/02/02/Redis缓存说明文档/" itemprop="url">Redis缓存说明文档</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-02T16:50:46+08:00">
+                2018-02-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><strong>下单相关</strong></p>
+<p>文件位置：CTPRedisUtil类</p>
+<h6 id="1-key-ALL-CTP-ORDER"><a href="#1-key-ALL-CTP-ORDER" class="headerlink" title="1.key: ALL_CTP_ORDER"></a>1.key: ALL_CTP_ORDER</h6><p>作用：存储CTP订单信息。<br>存储场景：<br>1).更新所有委托单：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String key = AllCTPOrder + ctpRspQryOrder.getAccountId();</span><br><span class="line">writeRedisTemplateSlave.opsForHash().put(key,ctpRspQryOrder.getOrderLocalID(),ctpRspQryOrder);</span><br></pre></td></tr></table></figure>
+<p>调用场景：<br>1).获取所有委托单：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取所有委托单</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-34-31 下午3:34</span><br><span class="line"> */</span><br><span class="line">public List getAllCTPOrder(String accountId)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = AllCTPOrder + accountId ;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>2).交易报表根据id取报单数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 获取报单记录</span><br><span class="line">allQryOrder.put(qryTrade.getOrderLocalID(), ctpRedisUtil.getCTPOrderByOrderLocalID(accountInfo.getAccountID(), qryTrade.getOrderLocalID()));</span><br></pre></td></tr></table></figure></p>
+<p>清除数据场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public Result run(JobContext jobContext)&#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        ctpRedisUtil.deleteAllOrderAndTrade();</span><br><span class="line">        return new Result(Action.EXECUTE_SUCCESS, &quot;CTP删除所有报单和成交记录任务成功&quot;);</span><br><span class="line">    &#125; catch (Exception e) &#123;</span><br><span class="line">        logger.error(&quot;CTP删除所有报单任务失败&quot;);</span><br><span class="line">        return new Result(Action.EXECUTE_FAILED,&quot;CTP删除所有报单和成交记录任务失败&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="2-key-WORKING-CTP-ORDER"><a href="#2-key-WORKING-CTP-ORDER" class="headerlink" title="2.key:WORKING_CTP_ORDER"></a>2.key:WORKING_CTP_ORDER</h6><p>作用：存储未成交单信息。<br>存储场景：<br>1).更新工作委托单(可以撤单):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String key = WorkingCTPOrder + ctpRspQryOrder.getAccountId();</span><br><span class="line">writeRedisTemplateSlave.opsForHash().put(key,ctpRspQryOrder.getOrderLocalID(),ctpRspQryOrder);</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取所有工作委托单</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2018-20-01 下午2:20</span><br><span class="line"> */</span><br><span class="line">public List getWorkingOrders(String userId)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = WorkingCTPOrder + userId ;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//更新所有委托单时若查询CTP订单状态为： THOST_FTDC_OST_AllTraded--全部成交、THOST_FTDC_OST_Canceled--撤单、THOST_FTDC_OST_Touched--已触发、THOST_FTDC_OST_PartTradedNotQueueing--部分成交不在队列中</span><br><span class="line">if(cThostFtdcOrderField.getOrderStatus() == CTPConstant.THOST_FTDC_OST_AllTraded</span><br><span class="line">                || cThostFtdcOrderField.getOrderStatus() == CTPConstant.THOST_FTDC_OST_Canceled</span><br><span class="line">                || cThostFtdcOrderField.getOrderStatus() == CTPConstant.THOST_FTDC_OST_Touched</span><br><span class="line">                || cThostFtdcOrderField.getOrderStatus() == CTPConstant.THOST_FTDC_OST_PartTradedNotQueueing)</span><br><span class="line">&#123;</span><br><span class="line">                this.deleteWorkingOrder(ctpRspQryOrder);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="3-key-WAIT-CTP-ORDER"><a href="#3-key-WAIT-CTP-ORDER" class="headerlink" title="3.key:WAIT_CTP_ORDER"></a>3.key:WAIT_CTP_ORDER</h6><p>作用：存储预埋单信息。<br>存储场景：<br>1).更新预埋单:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">String key = WaitCTPOrder + ctpRspQryOrder.getAccountId();</span><br><span class="line">if(ctpRspQryOrder.getOrderStauts()!= &apos;3&apos;)&#123;</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().put(key,ctpRspQryOrder.getOrderLocalID(),ctpRspQryOrder);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用缓存数据场景：<br>1).获取预埋单：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line">     *description: 获取预埋条件单</span><br><span class="line">     *author: wlb</span><br><span class="line">     *date: 2018-17-01 下午4:17</span><br><span class="line">     */</span><br><span class="line">    public List getWaitOrders(String accountId)&#123;</span><br><span class="line">        RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">        String key = WaitCTPOrder + accountId;</span><br><span class="line">        return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>删除缓存场景：<br>1).预埋单成交更改预埋单状态：</p>
+<p>2).每天五点清除所有订单缓存定时任务清除：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public void deleteAllOrderAndTrade() throws Exception&#123;</span><br><span class="line">        RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">        List&lt;XbAccount&gt; accounts = accountService.getAccountList();</span><br><span class="line">        for (XbAccount xbAccount : accounts)&#123;</span><br><span class="line">            String accountId = xbAccount.getAccount();</span><br><span class="line">            String waitkey = WaitCTPOrder + accountId ;</span><br><span class="line">            String workkey = WorkingCTPOrder + accountId;</span><br><span class="line">            String allWorderkey = AllCTPOrder + accountId;</span><br><span class="line">            String allTradekey = AllCTPTrade + accountId;</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(waitkey);</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(workkey);</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(allWorderkey);</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(allTradekey);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="4-key-ALL-CTP-TRADE"><a href="#4-key-ALL-CTP-TRADE" class="headerlink" title="4.key:ALL_CTP_TRADE"></a>4.key:ALL_CTP_TRADE</h6><p>作用：存储成交单信息。<br>存储场景：<br>1).更新成交记录:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String key = AllCTPTrade + ctpRspQryTrade.getAccountId();</span><br><span class="line">writeRedisTemplateSlave.opsForHash().put(key,ctpRspQryTrade.getOrderLocalID(),ctpRspQryTrade);</span><br></pre></td></tr></table></figure></p>
+<p>调用数据场景：<br>1).获取所有成交记<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取所有成交记录列表</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2018-45-01 下午7:45</span><br><span class="line"> */</span><br><span class="line">public List getAllCTPTrade(String accountId)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = AllCTPTrade + accountId ;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>删除缓存数据场景：<br>1).每天五点的定时任务CTPDayDeleteAllOrderAndTrade清除订单缓存<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public void deleteAllOrderAndTrade() throws Exception&#123;</span><br><span class="line">        RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">        List&lt;XbAccount&gt; accounts = accountService.getAccountList();</span><br><span class="line">        for (XbAccount xbAccount : accounts)&#123;</span><br><span class="line">            String accountId = xbAccount.getAccount();</span><br><span class="line">            String waitkey = WaitCTPOrder + accountId ;</span><br><span class="line">            String workkey = WorkingCTPOrder + accountId;</span><br><span class="line">            String allWorderkey = AllCTPOrder + accountId;</span><br><span class="line">            String allTradekey = AllCTPTrade + accountId;</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(waitkey);</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(workkey);</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(allWorderkey);</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(allTradekey);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="5-key-CTP-POSITION"><a href="#5-key-CTP-POSITION" class="headerlink" title="5.key:CTP_POSITION"></a>5.key:CTP_POSITION</h6><p>作用：存储账号持仓信息。<br>存储场景：<br>1).更新持仓:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String key =CTPPosition +  xbCTPPosition.getInvestorID();</span><br><span class="line">writeRedisTemplateSlave.opsForHash().put(key,xbCTPPosition.getInstrumentID()+&quot;_&quot;+xbCTPPosition.getPosiDirection(),xbCTPPosition);</span><br></pre></td></tr></table></figure></p>
+<p>调用数据场景：<br>1).获取所有持仓<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取所有持仓</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public List getCTPPosition(String accountId)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = CTPPosition + accountId;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>2).获取指定持仓：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取指定持仓</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 18-1-23 下午3:53</span><br><span class="line"> */</span><br><span class="line">public XbCTPPosition getCTPPositionByInstrumentId(String accountId,String instrumentId,Character direction)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = CTPPosition + accountId;</span><br><span class="line">    return  (XbCTPPosition) readRedisTemplateSlave.opsForHash().get(key,instrumentId+&quot;_&quot;+direction);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>删除缓存数据场景：<br>1).查询持仓信息，发现持仓为零时清除缓存数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 删除持仓</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public void deleteCTPPosition(XbCTPPosition xbCTPPosition)&#123;</span><br><span class="line">    RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">    String key = CTPPosition + xbCTPPosition.getInvestorID();</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().delete(key,xbCTPPosition.getInstrumentID()+&quot;_&quot;+xbCTPPosition.getPosiDirection());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>2).CTP删除持仓任务：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public Result run(JobContext jobContext) throws Throwable &#123;</span><br><span class="line"></span><br><span class="line">    List&lt;XbAccount&gt; list = accountService.getAccountList();</span><br><span class="line">    for(XbAccount xbAccount : list)&#123;</span><br><span class="line">        ctpRedisUtil.deleteAllPostition(xbAccount.getAccount());</span><br><span class="line">    &#125;</span><br><span class="line">    return new Result(Action.EXECUTE_SUCCESS, &quot;CTP删除持仓任务成功&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="6-key-CTP-AccountInfos"><a href="#6-key-CTP-AccountInfos" class="headerlink" title="6.key:CTP_AccountInfos"></a>6.key:CTP_AccountInfos</h6><p>作用：存储账号信息。<br>存储场景：<br>1).更新账号信息:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 更新账号信息</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public void updateCTPAccountInfo(XbCTPAccountInfo xbCTPAccountInfo)&#123;</span><br><span class="line">    RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">    String key =  CTPAccountInfos;</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().put(key,xbCTPAccountInfo.getAccountID(),xbCTPAccountInfo);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br>1).获取账号信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取账号信息列表</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public List getCTPAccountInfoList()&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = CTPAccountInfos;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">账号信息一般不删</span><br></pre></td></tr></table></figure></p>
+<h6 id="7-key-MarketData"><a href="#7-key-MarketData" class="headerlink" title="7.key:MarketData"></a>7.key:MarketData</h6><p>作用：存储行情数据。<br>存储场景：<br>1).更新行情数据:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 更新行情数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public void updateMarketData(CTPMarketData ctpMarketData)&#123;</span><br><span class="line">    RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">    String key =  MarketData;</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().put(key,ctpMarketData.getInstrumentID(),ctpMarketData);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br>1).获取行情数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取行情数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public CTPMarketData getMarketData(String instrumentID)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = MarketData;</span><br><span class="line">    return (CTPMarketData)readRedisTemplateSlave.opsForHash().get(key,instrumentID);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">行情信息一般不删</span><br></pre></td></tr></table></figure></p>
+<h6 id="8-key-CTPInstrumentData"><a href="#8-key-CTPInstrumentData" class="headerlink" title="8.key:CTPInstrumentData"></a>8.key:CTPInstrumentData</h6><p>作用：存储合约数据。<br>存储场景：<br>1).更新合约数据:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> /**</span><br><span class="line"> *description: 更新合约数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public void updateInstrumentData(XbFuturesInstrument xbFuturesInstrument)&#123;</span><br><span class="line">    RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">    String key =  CTPInstrumentData;</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().put(key,xbFuturesInstrument.getInstrumentID(),xbFuturesInstrument);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br>1).获取合约数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取所有合约数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public List getAllInstrumentData()&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = CTPInstrumentData;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">合约信息一般不删</span><br></pre></td></tr></table></figure></p>
+<h6 id="9-key-CTPInstrumentData"><a href="#9-key-CTPInstrumentData" class="headerlink" title="9.key:CTPInstrumentData"></a>9.key:CTPInstrumentData</h6><p>作用：存储产品数据。<br>存储场景：<br>1).更新产品数据:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> /**</span><br><span class="line"> *description: 更新产品数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public void updateProductData(XbFuturesProduct xbFuturesProduct)&#123;</span><br><span class="line">    RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">    String key =  CTPProductData;</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().put(key,xbFuturesProduct.getProductID(),xbFuturesProduct);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br>1).获取产品数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取所有产品数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public List getAllProductData()&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = CTPProductData;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">合约信息一般不删</span><br></pre></td></tr></table></figure></p>
+<h6 id="10-key-CTPInstrumentMarginRate"><a href="#10-key-CTPInstrumentMarginRate" class="headerlink" title="10.key:CTPInstrumentMarginRate"></a>10.key:CTPInstrumentMarginRate</h6><p>作用：存储合约保证金数据。<br>存储场景：<br>1).更新合约保证金数据:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> /**</span><br><span class="line"> *description: 更新合约保证金数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public void updateCTPInstrumentMarginRate(CTPInstrumentMarginRateField ctpInstrumentMarginRateField)&#123;</span><br><span class="line">    RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">    String key =  CTPInstrumentMarginRate + ctpInstrumentMarginRateField.getInvestorID();</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().put(key,ctpInstrumentMarginRateField.getInstrumentID()+&quot;_&quot;+ctpInstrumentMarginRateField.getHedgeFlag(),ctpInstrumentMarginRateField);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br>1).获取合约保证金数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取所有保证金数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public List getAllCTPInstrumentMarginRate(String accountId)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = CTPInstrumentMarginRate + accountId;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">合约信息一般不删</span><br></pre></td></tr></table></figure></p>
+<h6 id="11-key-CTPInstrumentCommissionRate"><a href="#11-key-CTPInstrumentCommissionRate" class="headerlink" title="11.key:CTPInstrumentCommissionRate"></a>11.key:CTPInstrumentCommissionRate</h6><p>作用：存储合约手续费数据。<br>存储场景：<br>1).更新合约手续费数据:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> /**</span><br><span class="line"> *description: 更新合约手续费数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public void updateInstrumentCommissionRate(CTPInstrumentCommissionRateField ctpInstrumentCommissionRateField)&#123;</span><br><span class="line">    RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">    String key =  CTPInstrumentCommissionRate;</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().put(key,ctpInstrumentCommissionRateField.getInstrumentID(),ctpInstrumentCommissionRateField);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br>1).获取合约手续费数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取手续费数据(productId是产品ID：比如zn1806就是zn)</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public CTPInstrumentCommissionRateField getInstrumentCommissionRate(String productId)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = CTPInstrumentCommissionRate;</span><br><span class="line">    return (CTPInstrumentCommissionRateField)readRedisTemplateSlave.opsForHash().get(key,productId);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">合约信息一般不删</span><br></pre></td></tr></table></figure></p>
+<h6 id="11-key-ALLCHILD-INSTRUMENT-JSONDATA"><a href="#11-key-ALLCHILD-INSTRUMENT-JSONDATA" class="headerlink" title="11.key:ALLCHILD_INSTRUMENT_JSONDATA"></a>11.key:ALLCHILD_INSTRUMENT_JSONDATA</h6><p>作用：存储模糊查询合约数据。<br>存储场景：<br>1).查询合约回报时初始化合约数据，所有合约数据转成JSON存入redis:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">writeRedisTemplateSlave.opsForValue().set(ALLCHILD_INSTRUMENT_JSONDATA,JSON.toJSONString(allInstrumentDataList));</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br>1).获取合约数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public JSONObject getAllInstrmentData() &#123;</span><br><span class="line"></span><br><span class="line">    JSONObject jsonObject = new JSONObject();</span><br><span class="line"></span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String jsonStr = (String)readRedisTemplateSlave.opsForValue().get(INSTRUMENT_JSONDATA);</span><br><span class="line">    String allStr = (String)readRedisTemplateSlave.opsForValue().get(ALLCHILD_INSTRUMENT_JSONDATA);</span><br><span class="line">    List&lt;SelectData&gt; selectDataList = (List&lt;SelectData&gt;)JSON.parse(jsonStr);</span><br><span class="line">    List&lt;InstrumentData&gt; instrumentDatas = (List&lt;InstrumentData&gt;)JSON.parse(allStr);</span><br><span class="line"></span><br><span class="line">    jsonObject.put(&quot;zlList&quot;,selectDataList);</span><br><span class="line">    jsonObject.put(&quot;zlAllList&quot;,instrumentDatas);</span><br><span class="line"></span><br><span class="line">    return jsonObject;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">合约信息一般不删</span><br></pre></td></tr></table></figure></p>
+<h6 id="12-key-ctp-risk-manager-position"><a href="#12-key-ctp-risk-manager-position" class="headerlink" title="12.key:ctp_risk_manager_position"></a>12.key:ctp_risk_manager_position</h6><p>作用：风控所需数据。<br>存储场景：<br>1).风险管理-持仓设置自动任务向redis写入数据:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">//更新redis里面用户消息</span><br><span class="line">Map map = DataUtils.beanToMap(ctpRiskManager);</span><br><span class="line">redisTemplate.opsForHash().putAll(StringConstant.CTP_RISK_MANAGERT_DATA + xbAccount.getId(), map);</span><br></pre></td></tr></table></figure></p>
+<p>调用缓存场景：<br>1).获取仓位上限：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">positionLimit = (double) hashOperations.get(StringConstant.CTP_RISK_MANAGERT_DATA + accountId, &quot;totalPositionLimit&quot;);</span><br></pre></td></tr></table></figure></p>
+<p>2).获取单品种持仓上限：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HashMap hashMap = (HashMap) hashOperations.get(StringConstant.CTP_RISK_MANAGERT_DATA + accountId, &quot;siglePositionTopLimit&quot;);</span><br></pre></td></tr></table></figure></p>
+<p>3).获取隔夜持仓保证金：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">positionRatio = (double) hashOperations.get(StringConstant.CTP_RISK_MANAGERT_DATA + accountId, &quot;oPositionRatio&quot;);</span><br><span class="line">setPositionRatio = xbRiskLevel.getoPositionRatio();</span><br></pre></td></tr></table></figure></p>
+<p>4).获取日内持仓保证金：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#获取日内持仓保证金</span><br><span class="line">positionRatio = (double) hashOperations.get(StringConstant.CTP_RISK_MANAGERT_DATA + accountId, &quot;tPositionRatio&quot;);</span><br><span class="line">setPositionRatio = xbRiskLevel.gettPositionRatio();</span><br></pre></td></tr></table></figure>
+<p>5).获取单品种持仓保证金：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">positionRatio = (double) hashOperations.get(StringConstant.CTP_RISK_MANAGERT_DATA + accountId, &quot;sPositionRatio&quot;);</span><br><span class="line">setPositionRatio = xbRiskLevel.getsPositionRatio();</span><br></pre></td></tr></table></figure>
+<p>6).获取账号总仓位上限：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">positionLimit = (double) hashOperations.get(StringConstant.CTP_RISK_MANAGERT_DATA + accountId, &quot;totalPositionLimit&quot;);</span><br><span class="line">setPositionLimit = xbAccountRisk.getTotalPositionLimit();</span><br></pre></td></tr></table></figure></p>
+<p>7).获取账号净持仓上限:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">positionLimit = (double) hashOperations.get(StringConstant.CTP_RISK_MANAGERT_DATA + accountId, &quot;netEquityPositionLimit&quot;);</span><br><span class="line">setPositionLimit = xbAccountRisk.getNetEquityPositionLimit();</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：</p>
+<h6 id="13-key-shiro-redis-cache"><a href="#13-key-shiro-redis-cache" class="headerlink" title="13.key:shiro_redis_cache"></a>13.key:shiro_redis_cache</h6><p>作用：<br>存储场景：<br>调用场景：<br>缓存清除场景：</p>
+<h6 id="14-key-shiro-redis-session"><a href="#14-key-shiro-redis-session" class="headerlink" title="14.key:shiro_redis_session"></a>14.key:shiro_redis_session</h6><p>作用：<br>存储场景：<br>调用场景：<br>缓存清除场景：</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/02/SUNRISE自动任务说明文档/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="addplus9">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝樾博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/02/02/SUNRISE自动任务说明文档/" itemprop="url">SUNRISE自动任务说明文档</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-02T16:01:16+08:00">
+                2018-02-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h5 id="1-CTP账号信息查询任务"><a href="#1-CTP账号信息查询任务" class="headerlink" title="1.    CTP账号信息查询任务"></a>1.    CTP账号信息查询任务</h5><p>任务名: CTPAccountQryJobRunner</p>
+<p>执行节点：sanber_lts_TaskTracker</p>
+<p>使用场景： 新建账号时开启任务,修改账号时更新任务</p>
+<p>描述：为SUNRISE新建基金账户时，需要一个在交易所已经建好的账户，将该账户号填入SUNRISE系统后，SUNRISE将会向交易所提供的接口查询该账户相关信息–CThostFtdcTradingAccountField，业务中我们将该对象信息处理成XbCTPAccountInfo。由于基金价格的实时变动，导致以价格为基准的账户中其他信息比如持仓盈亏，权益等会实时变动，所以需要开启一个自动任务，让系统每秒去交易所获取账户信息，然后存入redis，以备系统需要时快速取得数据。<br>调用图例:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line"></span><br><span class="line">    A[前端] --&gt;|频繁调用| B&#123;addplus_web&#125;</span><br><span class="line">    B --&gt;|频繁读取| C(redis)</span><br><span class="line">    B --&gt;|开启任务| D(lts)</span><br><span class="line">    D --&gt;|频繁写入| C(redis)</span><br></pre></td></tr></table></figure>
+<p>代码位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sanber_web模块--&gt;src--&gt;main--&gt;java--&gt;lts--&gt;taskTracker--&gt;ctpqryjobrunner--&gt;CTPAccountQryjobRunner</span><br></pre></td></tr></table></figure></p>
+<p>关联数据库: xb_account<br>获取对象字段: XbCTPAccountInfo<br>循环执行间隔: 1s<br>实际业务哪些功能用到了该任务: 增加、修改期货账号时。<br>调用CTP接口:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int qryTradingAccount = transactionAction.reqQryTradingAccount(futurnId,0);</span><br></pre></td></tr></table></figure>
+<p>查询回调函数:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *投资者信息确认回调</span><br><span class="line"> */</span><br><span class="line">@Override</span><br><span class="line">public void onRspQryTradingAccount(String accountId, CThostFtdcTradingAccountField cThostFtdcTradingAccountField, CThostFtdcRspInfoField cThostFtdcRspInfoField, Integer integer, Boolean aBoolean) &#123;</span><br><span class="line">    if(cThostFtdcRspInfoField.getErrorID() != 0)&#123;</span><br><span class="line">        logger.error(&quot;CTP交易账号查询失败,失败码:&quot;+cThostFtdcRspInfoField.getErrorID()+&quot;;失败原因:&quot;+cThostFtdcRspInfoField.getErrorMsg());</span><br><span class="line">    &#125;else&#123;</span><br><span class="line"></span><br><span class="line">        #将账号信息录入更新redis</span><br><span class="line">        ctpTradeOrderService.reqAccount(cThostFtdcTradingAccountField);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>任务调用参考:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">//查询账号任务</span><br><span class="line">Job job = new Job();</span><br><span class="line">//期货账号+_CTPAccountQryJobRunner</span><br><span class="line">job.setTaskId(account.getAccount()+&quot;_CTPAccountQryJobRunner&quot;);</span><br><span class="line">// 循环执行时间参数</span><br><span class="line">job.setCronExpression(&quot;0/1 * * * * ?&quot;);</span><br><span class="line">Map&lt;String,String&gt; map = new HashMap&lt;&gt;();</span><br><span class="line">map.put(&quot;beanName&quot;,&quot;CTPAccountQryJobRunner&quot;);</span><br><span class="line">map.put(&quot;futurnId&quot;,account.getAccount());</span><br><span class="line">job.setExtParams(map);</span><br><span class="line">job.setRelyOnPrevCycle(true);</span><br><span class="line">jobClientHandle.addClient(job);</span><br></pre></td></tr></table></figure></p>
+<p>关闭：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jobClientHandle.deleteClient(account.getAccount()+&quot;_CTPAccountQryJobRunner&quot;);</span><br></pre></td></tr></table></figure>
+<h5 id="2-持仓查询任务"><a href="#2-持仓查询任务" class="headerlink" title="2. 持仓查询任务"></a>2. 持仓查询任务</h5><p>任务名: CTPPositionQryJobRunner</p>
+<p>执行节点：sanber_lts_TaskTracker</p>
+<p>使用场景： 新建账号时开启任务,修改账号时更新任务</p>
+<p>描述：SUNRISE系统中的账户持仓情况，任务获取数据后组装成XbCTPPosition存入redis\<br>代码位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sanber_web模块--&gt;src--&gt;main--&gt;java--&gt;lts--&gt;taskTracker--&gt;ctpqryjobrunner--&gt;CTPPositionQryJobRunner</span><br></pre></td></tr></table></figure></p>
+<p>关联数据库:<br>查询字段:<br>循环执行间隔: 1s<br>实际业务哪些功能用到了该任务: 增加、修改期货账号时。<br>调用CTP接口:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int res = transactionAction.reqQryInvestorPosition(futurnId,0);</span><br></pre></td></tr></table></figure></p>
+<p>CTP查询回调：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *请求查询投资者持仓回调</span><br><span class="line"> */</span><br><span class="line">@Override</span><br><span class="line">public void onRspQryInvestorPosition(String accountId, CThostFtdcInvestorPositionField cThostFtdcInvestorPositionField, CThostFtdcRspInfoField cThostFtdcRspInfoField, Integer integer, Boolean aBoolean) &#123;</span><br><span class="line">    if(cThostFtdcRspInfoField.getErrorID() != 0)&#123;</span><br><span class="line">        logger.error(&quot;CTP交易持仓查询失败,失败码:&quot;+cThostFtdcRspInfoField.getErrorID()+&quot;;失败原因:&quot;+cThostFtdcRspInfoField.getErrorMsg());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /****************************将持仓录入更新redis*********************************/</span><br><span class="line">    if(StringUtils.isNotBlank(cThostFtdcInvestorPositionField.getInvestorID())</span><br><span class="line">            &amp;&amp;StringUtils.isNotBlank(cThostFtdcInvestorPositionField.getInstrumentID()))&#123;</span><br><span class="line">        ctpTradeOrderService.onRspQryInvestorPositionBack(cThostFtdcInvestorPositionField,aBoolean);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>任务调用参考：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">//查询持仓任务</span><br><span class="line">job = new Job();</span><br><span class="line">job.setTaskId(account.getAccount()+&quot;_CTPPositionQryJobRunner&quot;);</span><br><span class="line">job.setCronExpression(&quot;0/1 * * * * ?&quot;);</span><br><span class="line">map = new HashMap&lt;&gt;();</span><br><span class="line">map.put(&quot;beanName&quot;,&quot;CTPPositionQryJobRunner&quot;);</span><br><span class="line">map.put(&quot;futurnId&quot;,account.getAccount());</span><br><span class="line">job.setExtParams(map);</span><br><span class="line">job.setRelyOnPrevCycle(true);</span><br><span class="line">jobClientHandle.addClient(job);</span><br></pre></td></tr></table></figure>
+<p>关闭：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jobClientHandle.deleteClient(account.getAccount()+&quot;_CTPPositionQryJobRunner&quot;);</span><br></pre></td></tr></table></figure>
+<h5 id="3-预埋单（委托单）查询任务"><a href="#3-预埋单（委托单）查询任务" class="headerlink" title="3.    预埋单（委托单）查询任务"></a>3.    预埋单（委托单）查询任务</h5><p>任务名: CTPParkedOrderQryJobRunner</p>
+<p>执行节点：sanber_lts_TaskTracker</p>
+<p>使用场景： 新建账号时开启任务,修改账号时更新任务</p>
+<p>描述：<br>代码位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sanber_web模块--&gt;src--&gt;main--&gt;java--&gt;lts--&gt;taskTracker--&gt;ctpqryjobrunner--&gt;CTPParkedOrderQryJobRunner</span><br></pre></td></tr></table></figure></p>
+<p>关联数据库:<br>查询字段:<br>循环执行间隔: 每天9，10，14，22点的1，15，30分执行。<br>实际业务哪些功能用到了该任务: 增加、修改期货账号时。<br>调用CTP接口:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int res=transactionAction.reqQryParkedOrder(futurnId,null,0);</span><br></pre></td></tr></table></figure></p>
+<p>CTP回调：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 委托单报单回报</span><br><span class="line"> */</span><br><span class="line">@Override</span><br><span class="line">public void onRspOrderInsert(String s, CThostFtdcInputOrderField cThostFtdcInputOrderField, CThostFtdcRspInfoField cThostFtdcRspInfoField, Integer integer, Boolean aBoolean) &#123;</span><br><span class="line">    if(StringUtils.isNotBlank(cThostFtdcInputOrderField.getAccountID()))&#123;</span><br><span class="line">        ctpTradeOrderService.onRspOrderInsertBack(cThostFtdcInputOrderField,cThostFtdcRspInfoField);</span><br><span class="line">        if(cThostFtdcRspInfoField.getErrorID() != 0)&#123;</span><br><span class="line">            logger.error(&quot;报单录入错误&quot;+cThostFtdcRspInfoField.getErrorMsg()+&quot;账号：&quot;+cThostFtdcInputOrderField.getAccountID()</span><br><span class="line">                            +&quot;合约: &quot;+cThostFtdcInputOrderField.getInstrumentID());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * 委托单操作回报</span><br><span class="line"> */</span><br><span class="line">@Override</span><br><span class="line">public void onRspOrderAction(String s, CThostFtdcInputOrderActionField cThostFtdcInputOrderActionField, CThostFtdcRspInfoField cThostFtdcRspInfoField, Integer integer, Boolean aBoolean) &#123;</span><br><span class="line">    if(StringUtils.isNotBlank(cThostFtdcInputOrderActionField.getInvestorID()))&#123;</span><br><span class="line">        ctpTradeOrderService.onRspOrderAction(cThostFtdcInputOrderActionField,cThostFtdcRspInfoField);</span><br><span class="line">        if(cThostFtdcRspInfoField.getErrorID() != 0)&#123;</span><br><span class="line">            logger.error(&quot;撤单录入错误&quot;+cThostFtdcRspInfoField.getErrorMsg()+&quot;账号：&quot;+cThostFtdcInputOrderActionField.getInvestorID()</span><br><span class="line">                    +&quot;合约: &quot;+cThostFtdcInputOrderActionField.getInstrumentID());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用参考：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">//查询委托单任务</span><br><span class="line">job = new Job();</span><br><span class="line">job.setTaskId(account.getAccount()+&quot;_CTPParkedOrderQryJobRunner&quot;);</span><br><span class="line">job.setCronExpression(&quot;1 1,15,30 9,10,14,22 * * ? &quot;);</span><br><span class="line">map = new HashMap&lt;&gt;();</span><br><span class="line">map.put(&quot;beanName&quot;,&quot;CTPParkedOrderQryJobRunner&quot;);</span><br><span class="line">map.put(&quot;futurnId&quot;,account.getAccount());</span><br><span class="line">job.setExtParams(map);</span><br><span class="line">job.setRelyOnPrevCycle(true);</span><br><span class="line">jobClientHandle.updateClient(job);</span><br></pre></td></tr></table></figure>
+<p>关闭：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jobClientHandle.deleteClient(account.getAccount()+&quot;_CTPParkedOrderQryJobRunner&quot;);</span><br></pre></td></tr></table></figure>
+<h5 id="4-CTP交易信息确认任务"><a href="#4-CTP交易信息确认任务" class="headerlink" title="4. CTP交易信息确认任务"></a>4. CTP交易信息确认任务</h5><p>任务名: CTPReqSettlementInfoConfirmJobRunner</p>
+<p>执行节点：sanber_lts_TaskTracker</p>
+<p>使用场景： 新建账号时开启任务,修改账号时更新任务</p>
+<p>描述：每天固定时间点进行一次确认。为什么不是交易完成马上确认？？？<br>代码位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sanber_web模块--&gt;src--&gt;main--&gt;java--&gt;lts--&gt;taskTracker--&gt;ctpqryjobrunner--&gt;CTPReqSettlementInfoConfirmJobRunner</span><br></pre></td></tr></table></figure></p>
+<p>关联数据库:<br>查询字段:<br>循环执行间隔: 每天8:00:00 12:00:00 20:00:00执行<br>实际业务哪些功能用到了该任务: 增加、修改期货账号时。<br>调用CTP接口:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int res=transactionAction.reqSettlementInfoConfirm(futurnId,0);</span><br></pre></td></tr></table></figure></p>
+<p>CTP回调：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *信息确认回调</span><br><span class="line"> */</span><br><span class="line">@Override</span><br><span class="line">public void onRspSettlementInfoConfirm(String accountId, CThostFtdcSettlementInfoConfirmField cThostFtdcSettlementInfoConfirmField, CThostFtdcRspInfoField cThostFtdcRspInfoField, Integer integer, Boolean aBoolean) &#123;</span><br><span class="line">    if(cThostFtdcRspInfoField.getErrorID() != 0)&#123;</span><br><span class="line">        logger.error(&quot;CTP交易信息确认失败,失败ID====&gt;&quot;+accountId+&quot;;失败原因====&gt;&quot;+cThostFtdcRspInfoField.getErrorMsg());</span><br><span class="line">    &#125;else&#123;</span><br><span class="line"></span><br><span class="line">        logger.info(&quot;CTP交易信息确认成功,确认ID====&gt;&quot;+accountId);</span><br><span class="line">        transactionAction.reqQryInstrument(accountId,0);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用参考：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">//每天确认信息</span><br><span class="line">job = new Job();</span><br><span class="line">job.setTaskId(account.getAccount()+&quot;_CTPReqSettlementInfoConfirmJobRunner&quot;);</span><br><span class="line">job.setCronExpression(&quot;0 0 8,12,20 * * ?&quot;);</span><br><span class="line">map = new HashMap&lt;&gt;();</span><br><span class="line">map.put(&quot;beanName&quot;,&quot;CTPReqSettlementInfoConfirmJobRunner&quot;);</span><br><span class="line">map.put(&quot;futurnId&quot;,account.getAccount());</span><br><span class="line">job.setExtParams(map);</span><br><span class="line">job.setRelyOnPrevCycle(true);</span><br><span class="line">jobClientHandle.updateClient(job);</span><br></pre></td></tr></table></figure></p>
+<p>关闭：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jobClientHandle.deleteClient(account.getAccount()+&quot;_CTPReqSettlementInfoConfirmJobRunner&quot;);</span><br></pre></td></tr></table></figure>
+<h5 id="5-每天删除当天工作和预埋单"><a href="#5-每天删除当天工作和预埋单" class="headerlink" title="5. 每天删除当天工作和预埋单"></a>5. 每天删除当天工作和预埋单</h5><p>任务名: CTPDayDeleteAllOrderAndTrade</p>
+<p>执行节点：sanber_lts_TaskTracker</p>
+<p>使用场景： 新建账号时开启任务,修改账号时更新任务</p>
+<p>描述：每天凌晨五点删除redis中存储的订单和交易信息<br>代码位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sanber_web模块--&gt;src--&gt;main--&gt;java--&gt;lts--&gt;taskTracker--&gt;ctpqryjobrunner--&gt;CTPDayDeleteAllOrderAndTrade</span><br></pre></td></tr></table></figure></p>
+<p>关联数据库:<br>查询字段:<br>循环执行间隔: 每天5：00：00点执行一次<br>实际业务哪些功能用到了该任务: 增加、修改期货账号时。<br>任务核心代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ctpRedisUtil.deleteAllOrderAndTrade();</span><br></pre></td></tr></table></figure></p>
+<p>调用参考：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">//每天删除报单和成交记录</span><br><span class="line">job = new Job();</span><br><span class="line">job.setTaskId(account.getAccount()+&quot;_CTPDayDeleteAllOrderAndTrade&quot;);</span><br><span class="line">job.setCronExpression(&quot;0 0 5 * * ? &quot;);</span><br><span class="line">map = new HashMap&lt;&gt;();</span><br><span class="line">map.put(&quot;beanName&quot;,&quot;CTPDayDeleteAllOrderAndTrade&quot;);</span><br><span class="line">map.put(&quot;futurnId&quot;,account.getAccount());</span><br><span class="line">job.setExtParams(map);</span><br><span class="line">job.setRelyOnPrevCycle(true);</span><br><span class="line">jobClientHandle.updateClient(job);</span><br></pre></td></tr></table></figure>
+<p>关闭：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jobClientHandle.deleteClient(account.getAccount()+&quot;_CTPDayDeleteAllOrderAndTrade&quot;);</span><br></pre></td></tr></table></figure></p>
+<h5 id="6-期货账号风控监控数据存入redis"><a href="#6-期货账号风控监控数据存入redis" class="headerlink" title="6.期货账号风控监控数据存入redis"></a>6.期货账号风控监控数据存入redis</h5><p>任务名: SanberRiskDataPositionJobRunner</p>
+<p>执行节点：sanber_lts_TaskTracker</p>
+<p>使用场景： 项目启动时开启任务</p>
+<p>描述：通过账户的持仓等信息计算出各项参数，组装成CTPRiskManager转成hashMap存入redis。<br>代码位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sanber_web模块--&gt;src--&gt;main--&gt;java--&gt;lts--&gt;taskTracker--&gt;ctpriskjobrunner--&gt;SanberRiskDataPositionJobRunner</span><br></pre></td></tr></table></figure></p>
+<p>关联数据库: CTP账号信息–xb_account<br>查询字段:<br>循环执行间隔: 1min<br>实际业务哪些功能用到了该任务: 持仓设置，消息报警。<br>redis存储的key:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redisTemplate.opsForHash().putAll(StringConstant.CTP_RISK_MANAGERT_DATA + xbAccount.getId(), map);</span><br></pre></td></tr></table></figure></p>
+<p>调用参考：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">//提交期货账号风控监控数据存入redis</span><br><span class="line">Job job = new Job();</span><br><span class="line">job.setTaskId(&quot;SanberRiskDataPositionJobRunner&quot;);</span><br><span class="line">job.setCronExpression(&quot;1 * * * * ?&quot;);</span><br><span class="line">Map&lt;String,String&gt; map = new HashMap&lt;&gt;();</span><br><span class="line">map.put(&quot;beanName&quot;,&quot;SanberRiskDataPositionJobRunner&quot;);</span><br><span class="line">job.setExtParams(map);</span><br><span class="line">job.setRelyOnPrevCycle(false);</span><br><span class="line">jobClientHandle.addClient(job);</span><br></pre></td></tr></table></figure>
+<p>关闭：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">```</span><br><span class="line">##### 7.风控设置-资金监控定时类</span><br><span class="line">任务名: SanberRiskFundJobRunner</span><br><span class="line"></span><br><span class="line">执行节点：sanber_lts_TaskTracker</span><br><span class="line"></span><br><span class="line">使用场景： 项目启动时开启任务</span><br><span class="line">描述：从redis中取风控监控数据和针对该账号的**资金设置**预警数据作对比，触发报警则向前台发送一条提示消息；涉及两个重要对象：CTPRiskManager--风险管理数据包装实体类，是根据账户实时数据组装成的对象；XbAccountRisk--设定的账户各风控值实体类，是设定好的各风控值。报警触发条件有：availableFunds--账户可用资金比例小于等于风控设定值；leverageRatio--账户杆杆率大于风控设定值；varRatio--账户VAR风险率大于风控设定值；targetDamnify--账户止损值比例大于风控设定值。</span><br><span class="line">代码位置：</span><br></pre></td></tr></table></figure>
+<p>sanber_web模块–&gt;src–&gt;main–&gt;java–&gt;lts–&gt;taskTracker–&gt;ctpriskjobrunner–&gt;SanberRiskFundJobRunner<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">关联数据库: </span><br><span class="line">查询字段: </span><br><span class="line">循环执行间隔: 1min</span><br><span class="line">实际业务哪些功能用到了该任务: 持仓设置，报警。</span><br><span class="line">调用参考:</span><br></pre></td></tr></table></figure></p>
+<p>//风控资金设置监控任务<br>job = new Job();<br>job.setTaskId(“SanberRiskFundJobRunner”);<br>job.setCronExpression(“1 <em> </em> <em> </em> ?”);<br>map = new HashMap&lt;&gt;();<br>map.put(“beanName”,”SanberRiskFundJobRunner”);<br>job.setExtParams(map);<br>job.setRelyOnPrevCycle(false);<br>jobClientHandle.addClient(job);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">关闭:</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">##### 8.风控管理-持仓监控定时任务</span><br><span class="line">任务名: SanberRiskPositionJobRunner</span><br><span class="line"></span><br><span class="line">执行节点：sanber_lts_TaskTracker</span><br><span class="line"></span><br><span class="line">使用场景： 项目启动时开启任务。</span><br><span class="line"></span><br><span class="line">描述：和上一条任务一样是对账户的持仓设置监控报警，涉及CTPRiskManager、XbAccountRisk、XbRiskProduct--风控持仓产品信息类、XbRiskLevel--风控等级信息类等对象。报警条件：totalPositionLimit--账户总仓位上限大于等于设定值；netEquityPositionLimit--账户净持仓上限大于等于设定值；positionTopLimit--单品持仓上限大于等于设定值；tPositionRatio--日内持仓保证金占计划净值比例高于设定值；oPositionRatio--隔夜持仓保证金占计划净值比例高于设定值；sPositionRatio--单品种持仓保证金占计划净值比例。</span><br><span class="line"></span><br><span class="line">代码位置：</span><br></pre></td></tr></table></figure>
+<p>sanber_web模块–&gt;src–&gt;main–&gt;java–&gt;lts–&gt;taskTracker–&gt;ctpriskjobrunner–&gt;SanberRiskPositionJobRunner<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">关联数据库: 相变系统账户表--xb_account、相变风控信息表--xb_account_risk、相变风控等级信息表--xb_risk_level、相变风控持仓产品信息表--xb_risk_product</span><br><span class="line">查询字段: </span><br><span class="line">循环执行间隔: 1min</span><br><span class="line">实际业务哪些功能用到了该任务: 持仓设置，消息推送。</span><br><span class="line">调用参考：</span><br></pre></td></tr></table></figure></p>
+<p>//风控仓位监控任务<br>job = new Job();<br>job.setTaskId(“SanberRiskPositionJobRunner”);<br>job.setCronExpression(“1 <em> </em> <em> </em> ?”);<br>map = new HashMap&lt;&gt;();<br>map.put(“beanName”,”SanberRiskPositionJobRunner”);<br>job.setExtParams(map);<br>job.setRelyOnPrevCycle(false);<br>jobClientHandle.addClient(job);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">关闭：</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">##### 9.风控策略监测定时任务</span><br><span class="line">任务名: SanberRiskStrategyJobRunner</span><br><span class="line"></span><br><span class="line">执行节点：sanber_lts_TaskTracker</span><br><span class="line"></span><br><span class="line">使用场景： 项目启动时开启任务</span><br><span class="line"></span><br><span class="line">描述：和上一条任务一样是对账户的策略监控报警，涉及类：XbStrategyTradeDetails--策略持仓行情详情、CTPMarketData--行情数据类、XbStrategyPosition--策略详情信息类 等对象。报警条件：targetProfit--目标止盈值小于当前盈利；targetDamnify--目标止损值为负。</span><br><span class="line"></span><br><span class="line">代码位置：</span><br></pre></td></tr></table></figure>
+<p>sanber_web模块–&gt;src–&gt;main–&gt;java–&gt;lts–&gt;taskTracker–&gt;ctpriskjobrunner–&gt;SanberRiskStrategyJobRunner<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">关联数据库:策略持仓行情详情表--xb_strategy_trade_details、策略详情信息表--xb_strategy_position、 相变系统账户表--xb_account、相变风控信息表--xb_account_risk、相变风控等级信息表--xb_risk_level、相变风控持仓产品信息表--xb_risk_product</span><br><span class="line">查询字段: </span><br><span class="line">循环执行间隔: 1min</span><br><span class="line">实际业务哪些功能用到了该任务: 持仓设置，消息推送。</span><br><span class="line">调用参考：</span><br></pre></td></tr></table></figure></p>
+<p>//风控策略任务<br>job = new Job();<br>job.setTaskId(“SanberRiskStrategyJobRunner”);<br>job.setCronExpression(“1 <em> </em> <em> </em> ?”);<br>map = new HashMap&lt;&gt;();<br>map.put(“beanName”,”SanberRiskStrategyJobRunner”);<br>job.setExtParams(map);<br>job.setRelyOnPrevCycle(false);<br>jobClientHandle.addClient(job);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">关闭：</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">##### 10.报表统计-交易报表</span><br><span class="line">任务名: SanberTradeReportJobRunner</span><br><span class="line"></span><br><span class="line">执行节点：sanber_lts_TaskTracker</span><br><span class="line"></span><br><span class="line">使用场景：项目启动时启动任务。</span><br><span class="line">描述：交易报表，报表信息主要通过（List&lt;CTPRspQryTrade&gt; qryTradeList = ctpRedisUtil.getAllCTPTrade(accountInfo.getAccountID());）获得；涉及类：XbCTPAccountInfo--CTP账号信息、CTPRspQryTrade--账号成交记录、CTPRspQryOrder--CTP报单、XbFuturesInstrument--期货合约数据类</span><br><span class="line"></span><br><span class="line">代码位置：</span><br></pre></td></tr></table></figure>
+<p>sanber_web模块–&gt;src–&gt;main–&gt;java–&gt;lts–&gt;taskTracker–&gt;ctpreportjobrunner–&gt;SanberTradeReportJobRunner<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">关联数据库:交易日期--xb_futures_trade_date、期货合约数据表--xb_futures_instrument。</span><br><span class="line">查询字段: </span><br><span class="line">循环执行间隔: </span><br><span class="line">实际业务哪些功能用到了该任务: 交易报表。</span><br><span class="line"></span><br><span class="line">调用参考：</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">关闭：</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">##### 11.报表统计-风控报表</span><br><span class="line">任务名: SanberRiskReportJobRunner</span><br><span class="line"></span><br><span class="line">执行节点：sanber_lts_TaskTracker</span><br><span class="line"></span><br><span class="line">使用场景：项目启动时启动任务。</span><br><span class="line">描述：账户风控报表，关键是利用持仓信息（List&lt;XbCTPPosition&gt; positionList = ctpRedisUtil.getCTPPosition(accountId);）和所有成交单（List&lt;CTPRspQryTrade&gt; qryTradeList = ctpRedisUtil.getAllCTPTrade(accountId);）的信息。涉及类：XbCTPAccountInfo--CTP账号信息、XbReportRisk--风险控制类、XbAccount--账号信息类、CTPRspQryOrder--CTP报单、CTPRspQryOrder--CTP报单、XbFuturesInstrument--期货合约数据类</span><br><span class="line"></span><br><span class="line">代码位置：</span><br></pre></td></tr></table></figure>
+<p>sanber_web模块–&gt;src–&gt;main–&gt;java–&gt;lts–&gt;taskTracker–&gt;ctpreportjobrunner–&gt;SanberRiskReportJobRunner<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">关联数据库:交易日期--xb_futures_trade_date、风险控制报表--xb_report_risk、交易报表--xb_report_trade、</span><br><span class="line">查询字段: </span><br><span class="line">循环执行间隔: </span><br><span class="line">实际业务哪些功能用到了该任务: 交易报表。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">调用参考：</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">关闭：</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">##### 12.定时更新主力合约任务</span><br><span class="line">任务名: CTPUpdateZLInstrumentJobRunner</span><br><span class="line"></span><br><span class="line">执行节点：sanber_lts_TaskTracker</span><br><span class="line"></span><br><span class="line">使用场景：启动后台时开启定时任务</span><br><span class="line"></span><br><span class="line">描述：通过合约数据（final List&lt;XbFuturesInstrument&gt; list = ctpRedisUtil.getAllInstrumentData();）和行情数据（final Map&lt;String,CTPMarketData&gt; marketDataMap = ctpRedisUtil.getAllMarketMap();）获得数据</span><br><span class="line">代码位置：</span><br></pre></td></tr></table></figure>
+<p>sanber_web模块–&gt;src–&gt;main–&gt;java–&gt;lts–&gt;taskTracker–&gt;ctpqryjobrunner–&gt;CTPUpdateZLInstrumentJobRunner<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">关联数据库:期货合约表--xb_futures_instrument</span><br><span class="line">查询字段: </span><br><span class="line">循环执行间隔: 主力合约任务每天10：01：01、15：01：01、22：01：01执行，更新合约数据每月1号00：01：01执行</span><br><span class="line">实际业务哪些功能用到了该任务: redis更新主力合约</span><br><span class="line"></span><br><span class="line">调用参考：</span><br></pre></td></tr></table></figure></p>
+<p>//更新合约数据任务<br>Job job = new Job();<br>job.setTaskId(“CTPInstrumentQryJobRunner”);<br>job.setCronExpression(“1 1 0 1 <em> ? “);<br>Map<string,string> map = new HashMap&lt;&gt;();<br>map.put(“beanName”,”CTPUpdateZLInstrumentJobRunner”);<br>map.put(“futurnId”,”110702”);<br>job.setExtParams(map);<br>job.setRelyOnPrevCycle(false);<br>jobClientHandle.addClient(job);<br>//更新主力合约任务<br>job = new Job();<br>job.setTaskId(“CTPUpdateZLInstrumentJobRunner”);<br>job.setCronExpression(“1 1 10,15,22 </string,string></em> * ? “);<br>map = new HashMap&lt;&gt;();<br>map.put(“beanName”,”CTPUpdateZLInstrumentJobRunner”);<br>job.setExtParams(map);<br>job.setRelyOnPrevCycle(false);<br>jobClientHandle.addClient(job);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">关闭：</span><br></pre></td></tr></table></figure></p>
+<p>```</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/02/SUNRISE项目生产环境搭建及前后端部署/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="addplus9">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝樾博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/02/02/SUNRISE项目生产环境搭建及前后端部署/" itemprop="url">SUNRISE项目生产环境搭建及前后端部署</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-02T14:49:08+08:00">
+                2018-02-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="一、买服务器"><a href="#一、买服务器" class="headerlink" title="一、买服务器"></a>一、买服务器</h4><p>产品–》弹性云服务器<br>省钱买法：<br>先买弹性IP,再买服务器。<br>买好后获得IP地址</p>
+<h4 id="二、服务器基本环境安装"><a href="#二、服务器基本环境安装" class="headerlink" title="二、服务器基本环境安装"></a>二、服务器基本环境安装</h4><p>预装：JDK mysql zookeeper redis tomcat nginx</p>
+<h5 id="一-安装JDK"><a href="#一-安装JDK" class="headerlink" title="一) 安装JDK"></a>一) 安装JDK</h5><p>1、复制安装包到/usr/java目录中(目录可以自己选)：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp jdk-8u152-linux-x64.tar.gz  /usr/java</span><br></pre></td></tr></table></figure>
+<p>2、切换到/usr/java目录下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/java</span><br></pre></td></tr></table></figure></p>
+<p>3、解压缩包：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf jdk-8u152-linux-x64.tar.gz</span><br></pre></td></tr></table></figure></p>
+<p>解压成功（表式JDK已安装成功，可查看jdk的文件夹）</p>
+<p>此时java -version命令还不能使用：</p>
+<p>4、配置环境变量：</p>
+<p>使用vim /etc/profile 编辑profile文件 输入：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/profile</span><br></pre></td></tr></table></figure></p>
+<p>向文件里面追加以下内容：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#set java environment</span><br><span class="line">JAVA_HOME=/usr/java/jdk1.8.0_152</span><br><span class="line">JRE_HOME=$JAVA_HOME/jre</span><br><span class="line">PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin</span><br><span class="line">CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar:$JRE_HOME/lib</span><br><span class="line">export JAVA_HOME JRE_HOME PATH CLASSPATH</span><br></pre></td></tr></table></figure>
+<p>注释：</p>
+<p>JAVA_HOME指明JDK安装路径，就是刚才安装时所选择的路径，此路径下包括lib，bin，jre等文件夹（tomcat，Eclipse的运行都需要依靠此变量）。CLASSPATH为java加载类(class or    lib)路径，只有类在classpath中，java命令才能识别。<br>设：.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar:$JRE_HOME/lib。CLASSPATH变量值中的.表示当前目录PATH使得系统可以在任何路径下识别java命令，设为：$JAVA_HOME/bin:$JRE_HOME/bin。<br>特别注意：环境变量值的结尾没有任何符号，不同值之间用:隔开（windows中用;）。</p>
+<p>5、使配置文件生效：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure></p>
+<p>6、测试配置是否成功:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java</span><br></pre></td></tr></table></figure></p>
+<h5 id="二-安装mysql"><a href="#二-安装mysql" class="headerlink" title="二) 安装mysql"></a>二) 安装mysql</h5><p>1.linux下下载repo源<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//下载mysql rpm包</span><br><span class="line"># wget http://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm</span><br><span class="line"> </span><br><span class="line">//安装mysql rpm包</span><br><span class="line"># rpm -ivh mysql57-community-release-el7-11.noarch.rpm</span><br><span class="line"> </span><br><span class="line">//安装mysql</span><br><span class="line"># yum install mysql-community-server</span><br></pre></td></tr></table></figure></p>
+<p>安装成功后需要重启mysql服务。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># service mysqld restart</span><br></pre></td></tr></table></figure></p>
+<p>刚开始安装的Mysql会随机生成一个root密码的，我们要先找到这个随机密码，然后改新密码。我们可以通过grep命令查找随机root密码。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@local bin]# grep &quot;password&quot; /var/log/mysqld.log</span><br><span class="line">2017-09-24T08:03:30.664086Z 1 [Note] A temporary password is generated for root@localhost: xwbk8_P1A</span><br></pre></td></tr></table></figure></p>
+<p>使用随机密码登录mysql</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@local bin]# mysql -uroot -p</span><br><span class="line">Enter password:</span><br></pre></td></tr></table></figure>
+<p>进入后重置root密码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SET password=PASSWORD(&quot;mysql123&quot;);</span><br><span class="line">ERROR 1819 (HY000): Your password does not satisfy the current policy requirements</span><br></pre></td></tr></table></figure>
+<p>如果有上面的报错，说明密码设置的过于简单。密码设置规则是要有数字大小写字母和字符串。<br>最后授予外网登录权限,username为用户名，password是登录密码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;grant all privileges on *.* to username@&apos;%&apos; identified by &apos;password&apos;;</span><br></pre></td></tr></table></figure></p>
+<p> <strong>!!! 注意:mysql 命令后分号记得加。</strong></p>
+<p>测试:mysql是否装好：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql &gt; show databases;</span><br><span class="line">mysql &gt; \q;</span><br></pre></td></tr></table></figure></p>
+<p>华为云配置开放端口：进入对应服务器的安全组–&gt;点击进ID–&gt;快速添加规则<br>配置mysql远程访问：<a href="https://www.cnblogs.com/hyzhou/archive/2011/12/06/2278236.html" target="_blank" rel="noopener">https://www.cnblogs.com/hyzhou/archive/2011/12/06/2278236.html</a><br>配置好用navicat连接数据库测试</p>
+<p>更换配置文件：/etc/my.cnf</p>
+<p>主要参考： <a href="http://www.jb51.net/article/124518.htm" target="_blank" rel="noopener">http://www.jb51.net/article/124518.htm</a></p>
+<p>=================================================================================<br>service mysql start<br>此时出现一个问题是：<br>Redirecting to /bin/systemctl start mysql.service<br>Failed to start mysql.service: Unit not found.</p>
+<p>journalctl -xe</p>
+<p>Failed to start MySQL Server.<br>装数据库的时候映射了数据库的data路径，配置文件中data改成对应指定的文件路径，遇到问题先看日志查找原因。</p>
+<p>===============================================================================</p>
+<h5 id="三）安装zookeeper"><a href="#三）安装zookeeper" class="headerlink" title="三）安装zookeeper"></a>三）安装zookeeper</h5><p>1 . 下载合适资源解压：<br><a href="http://mirror.bit.edu.cn/apache/zookeeper/" target="_blank" rel="noopener">http://mirror.bit.edu.cn/apache/zookeeper/</a></p>
+<p>2 . cd 进解压好的zookeeper文件夹中的conf文件夹<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp zoo_sample.cfg zoo.cfg</span><br></pre></td></tr></table></figure></p>
+<p>3.进bin文件夹启动zookeeper<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd /home/zookeeper-3.4.11/bin ./zkServer.sh start</span><br></pre></td></tr></table></figure></p>
+<h5 id="四-安装redis"><a href="#四-安装redis" class="headerlink" title="四) 安装redis"></a>四) 安装redis</h5><p>参考：<a href="http://note.youdao.com/noteshare?id=1ca518f7c0e8e1f826e6cfe6f9cf200f" target="_blank" rel="noopener">http://note.youdao.com/noteshare?id=1ca518f7c0e8e1f826e6cfe6f9cf200f</a></p>
+<h5 id="五）安装tomcat"><a href="#五）安装tomcat" class="headerlink" title="五）安装tomcat"></a>五）安装tomcat</h5><p>1 . 下载资源：<br><a href="http://mirror.bit.edu.cn/apache/tomcat/" target="_blank" rel="noopener">http://mirror.bit.edu.cn/apache/tomcat/</a></p>
+<p>2 . 解压后进cd进bin文件夹启动<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd bin</span><br><span class="line">./startup.sh</span><br></pre></td></tr></table></figure></p>
+<hr>
+<h5 id="六）安装ngnix"><a href="#六）安装ngnix" class="headerlink" title="六）安装ngnix"></a>六）安装ngnix</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nginx启动: cd /usr/local/nginx/sbin ./nginx</span><br><span class="line">外网测试：浏览器输入：nginx映射的IP 出现 Welcome to nginx!</span><br></pre></td></tr></table></figure>
+<p>1.安装nginx依赖:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$   yum install gcc-c++  </span><br><span class="line">$   yum install pcre pcre-devel  </span><br><span class="line">$   yum install zlib zlib-devel  </span><br><span class="line">$   yum install openssl openssl--devel</span><br></pre></td></tr></table></figure>
+<p>2.找合适的nginx版本： <a href="http://nginx.org/download" target="_blank" rel="noopener">http://nginx.org/download</a></p>
+<p>3.下载解压</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$   cd /home</span><br><span class="line">$   wget http://nginx.org/download/nginx-1.7.4.tar.gz</span><br><span class="line">$   tar -zxvf nginx-1.7.4.tar.gz</span><br><span class="line">$   cd  nginx-1.7.4</span><br></pre></td></tr></table></figure>
+<p>4.接下来安装，使用–prefix参数指定nginx安装的目录,make、make install安装</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$   ./configure  $默认安装在/usr/local/nginx   </span><br><span class="line">$   make  </span><br><span class="line">$   make install</span><br></pre></td></tr></table></figure>
+<p>如果没有报错，顺利完成后，最好看一下nginx的安装目录</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$   whereis nginx</span><br></pre></td></tr></table></figure>
+<p>安装完毕后，进入安装后目录（/usr/local/nginx）便可以启动或停止它了。<br>到此，使用CentOS安装nginx已经完成</p>
+<p>5.nginx启动关闭:<br>启动:<br>1).进入安装目录<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local/nginx/sbin/</span><br></pre></td></tr></table></figure></p>
+<p>2).启动<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./nginx</span><br></pre></td></tr></table></figure></p>
+<p>3).查看是否启动：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -ef | grep nginx</span><br></pre></td></tr></table></figure></p>
+<p>如果有master和worker两个进程证明启动成功。</p>
+<p>停止:<br>1).暴力kill(不推荐使用)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kill -9 processId</span><br></pre></td></tr></table></figure></p>
+<p>2).快速停止<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local/nginx/sbin &amp;&amp; ./nginx -s stop</span><br></pre></td></tr></table></figure></p>
+<p>此方式相当于先查出nginx进程id再使用kill命令强制杀掉进程。<br>3).完整停止(建议使用)<br>　　<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local/nginx/sbin &amp;&amp; ./nginx -s quit</span><br></pre></td></tr></table></figure></p>
+<p>此方式停止步骤是待nginx进程处理任务完毕进行停止</p>
+<p>主要参考：<br><a href="https://www.cnblogs.com/jerrypro/p/7062101.html" target="_blank" rel="noopener">https://www.cnblogs.com/jerrypro/p/7062101.html</a><br><a href="https://www.cnblogs.com/hafiz/p/6891458.html?utm_source=itdadao&amp;utm_medium=referral" target="_blank" rel="noopener">https://www.cnblogs.com/hafiz/p/6891458.html?utm_source=itdadao&amp;utm_medium=referral</a></p>
+<hr>
+<h4 id="三、后台工程打包部署"><a href="#三、后台工程打包部署" class="headerlink" title="三、后台工程打包部署"></a>三、后台工程打包部署</h4><p>后台工程打包部署过程：<br>到生产环境数据库新建表：<br>操作步骤：<br><a href="http://note.youdao.com/noteshare?id=d8ace1e92b8612f60511a31bca137bb8" target="_blank" rel="noopener">http://note.youdao.com/noteshare?id=d8ace1e92b8612f60511a31bca137bb8</a></p>
+<h5 id="1-lts-任务中心启动"><a href="#1-lts-任务中心启动" class="headerlink" title="1.lts 任务中心启动"></a>1.lts 任务中心启动</h5><p><strong>sanber_lts_jobtracker 模块 –作用 后台转发任务（如定时任务）</strong></p>
+<p>克隆 sanber_lts工程 application-prod文件配置好生产环境的相关参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cluster-name：</span><br><span class="line">zookeeper--改成127.0.0.1 </span><br><span class="line">mysql--改成127.0.0.1</span><br><span class="line">lts.jobtracker.configs.jdbc.username=root</span><br><span class="line">lts.jobtracker.configs.jdbc.password=11111</span><br><span class="line">改成127.0.0.1是因为zookeeper和mysql都装在服务器本地</span><br><span class="line">spring.profiles.active=prod</span><br></pre></td></tr></table></figure>
+<p>idea 右边maven install打包 左边target下找到jar包找到finder中的位置<br>放到华为云:<br>路径/home/code/lts<br>确保zookeeper已启动<br>启动：cd 进该目录然后</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup java -jar sanber_lts_jobtracker-0.0.1.jar &gt;1 &amp;</span><br></pre></td></tr></table></figure>
+<p>lts 任务提交：<br>SUNRISE后台自动任务由三个角色组成其中：sanber_lts_jobtracker部署后负责任务分发；lts.tasktracker负责任务执行，lts.jobclient负责任务提交客户端；这三个文件中zookeeper和mysql的配置务必保持一致，sanber_lts_jobtracker是独立工程，后面两个配置在sanber_web的application-dev.properties等文件中。sanber_lts_admin是对后台启动的各项任务的监控工具。<br>sanber_web模块中<br>application.properties 文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 多环境配置文件激活属性</span><br><span class="line">spring.profiles.active=prod</span><br></pre></td></tr></table></figure>
+<p>application-test.properties 文件中<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lts.jobclient.registry-address=zookeeper://111.111.111.11:2181</span><br></pre></td></tr></table></figure></p>
+<p>在test文件夹下<br>SanberWebApplicationTest 右键文件目录：debug运行</p>
+<p>lts-admin.cfg和lts-monitor.cfg<br>更改配置:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">registryAddress=zookeeper://127.0.0.1:2181</span><br><span class="line">configs.jdbc.url=jdbc:mysql://127.0.0.1:3306/lts?useUnicode=true&amp;characterEncoding=utf-8</span><br><span class="line">configs.jdbc.username=root</span><br><span class="line">configs.jdbc.password=11111</span><br></pre></td></tr></table></figure>
+<p>该模块pom.xml中 生产环境activation改成true</p>
+<pre><code>&lt;profiles&gt;
+    &lt;profile&gt;
+        &lt;!-- 测试环境 --&gt;
+        &lt;id&gt;test&lt;/id&gt;
+        &lt;properties&gt;
+            &lt;profiles.active&gt;test&lt;/profiles.active&gt;
+        &lt;/properties&gt;
+    &lt;/profile&gt;
+    &lt;profile&gt;
+        &lt;!-- 生产环境 --&gt;
+        &lt;id&gt;prod&lt;/id&gt;
+        &lt;properties&gt;
+            &lt;profiles.active&gt;prod&lt;/profiles.active&gt;
+        &lt;/properties&gt;
+        &lt;activation&gt;
+            &lt;activeByDefault&gt;true&lt;/activeByDefault&gt;
+        &lt;/activation&gt;
+    &lt;/profile&gt;
+&lt;/profiles&gt;
+</code></pre><p>install 后.war包上传至华为云:<br>路径/home/tomcat/apache-tomcat-8.5.24/webapps<br>启动：因为是放在tomcat下的，tomcat启动后会自动解压war包运行</p>
+<p>查看: <a href="http://sanber.addplus9.com:8989/sanber_admin/cron-job-queue.html" target="_blank" rel="noopener">http://sanber.addplus9.com:8989/sanber_admin/cron-job-queue.html</a><br>页面查看：任务队列管理–》cron任务</p>
+<h5 id="2-打包运行后台sanber-institution"><a href="#2-打包运行后台sanber-institution" class="headerlink" title="2.打包运行后台sanber_institution"></a>2.打包运行后台sanber_institution</h5><p>拉最新代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">application.properties</span><br><span class="line"># 多环境配置文件激活属性</span><br><span class="line">spring.profiles.active=prod</span><br><span class="line"># 是否开启ctp本地连接</span><br><span class="line">ctp.connection=true</span><br><span class="line"></span><br><span class="line">application-prod.properties</span><br><span class="line">spring.datasource.type=com.alibaba.druid.pool.DruidDataSource</span><br><span class="line">spring.datasource.url=jdbc:mysql://127.0.0.1:3306/pro_baseauthority?useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false</span><br><span class="line">spring.datasource.username = root</span><br><span class="line">spring.datasource.password = 111111</span><br><span class="line">spring.datasource.driverClassName = com.mysql.jdbc.Driver</span><br><span class="line"></span><br><span class="line"># redis配置</span><br><span class="line">spring.redis.nodes=127.0.0.1:7100,127.0.0.1:7101</span><br></pre></td></tr></table></figure>
+<p>具体请看sanber_web项目中application-prod.properties文件。</p>
+<p>install 得到jar包后上传至华为云服务器：<br>路径：home/code/web<br>cd 到该目录下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup java -jar addplus-web.jar &gt;1 &amp;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#加监控参数 </span><br><span class="line">nohup java $JAVA_OPTS -jar addplus-web.jar &gt;1 &amp;</span><br></pre></td></tr></table></figure>
+<p>连续enter 两次后输入：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tail -f nohup.out</span><br></pre></td></tr></table></figure>
+<p>可查看启动输出日志</p>
+<p>成功后：ps -ef | grep addplus-web  查看进程<br>可用postman掉个接口看看是否正常：<br><a href="http://sanber.addplus9.com/sanber/base/login" target="_blank" rel="noopener">http://sanber.addplus9.com/sanber/base/login</a><br>{<br>  “account”: “admin”,<br>  “password”: “123456”<br>}</p>
+<p><strong>！！启动后台后为初始化数据需要在浏览器调以下两个接口：</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#初始化合约数据</span><br><span class="line">/get/web/ordermodule/OrderPageService/initInstrumentData</span><br><span class="line">#初始化行情数据</span><br><span class="line">/get/web/ordermodule/OrderPageService/initMarketData</span><br></pre></td></tr></table></figure></p>
+<p>要关闭该服务时可将进程强杀：kill -9</p>
+<h5 id="3-打包前台web包"><a href="#3-打包前台web包" class="headerlink" title="3.打包前台web包"></a>3.打包前台web包</h5><p>操作步骤：<br>1).上阿里云配置域名<br>2).前端代码拉最新：<br>配置文件修改：environment.prod.ts 中第一步配好的域名SERVER_URL<br>3).打包命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run build</span><br></pre></td></tr></table></figure>
+<p>成功后在base_background_web文件夹下有个dist文件夹，将dist文件夹中的内容上传至华为云：<br>上传路径：usr/frontend/sunrise<br>上传完成在浏览器中输入：<a href="http://sanber.addplus9.com/sunrise" target="_blank" rel="noopener">http://sanber.addplus9.com/sunrise</a> 测试</p>
+<hr>
+<p>查找文件位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find /  -name &apos;sanber_lts*&apos;</span><br></pre></td></tr></table></figure></p>
+<p>查找任务是否启动：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -ef|grep addplus</span><br></pre></td></tr></table></figure></p>
+<p>环境搭建和后台项目部署中有问题先看日志，再针对解决。</p>
+<hr>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/02/SUNRISE下单风控概要设计/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -302,11 +906,11 @@
           
             <h4 id="1-引言"><a href="#1-引言" class="headerlink" title="1. 引言"></a>1. 引言</h4><p>SUNRISR系统一期，是为相变投资团队量身打造的集用户管理、角色管理、菜单资源管理、基金账户管理、下单、风控报表、交易报表、策略风控、消息通知为一体的<br>工作平台,本篇文档侧重介绍下单、风控相关的业务需求，项目结构及代码位置。</p>
 <h5 id="1-1-编写目的"><a href="#1-1-编写目的" class="headerlink" title="1.1. 编写目的"></a>1.1. 编写目的</h5><p>本篇文档概要介绍SUNRISE系统中的下单、风控的业务流程和功能，描述主要接口。阅读人员为初次接触本系统的开发者。</p>
-<h5 id="1-2-定义"><a href="#1-2-定义" class="headerlink" title="1.2. 定义"></a>1.2. 定义</h5><p>篮子下单：对选定的期货品种，可以选择多个账户下单。<br>其他期货相关概念或者参数计算方法请参考以下文档：<br>期货相关：<br><a href="https://www.onenote.com/webapp/pages?token=ULCWc9v5bc3VJxGVpn8ZebYif0HDEHRNowvMsbVN2EkcTQl_B2YpDeaNEeVM0S51jLB9xz1msd21SIpmHbS3JMUVC2bgDlQ20&amp;id=636527905785427446" target="_blank" rel="noopener">https://www.onenote.com/webapp/pages?token=ULCWc9v5bc3VJxGVpn8ZebYif0HDEHRNowvMsbVN2EkcTQl_B2YpDeaNEeVM0S51jLB9xz1msd21SIpmHbS3JMUVC2bgDlQ20&amp;id=636527905785427446</a><br>交易相关：<br><a href="https://www.onenote.com/webapp/pages?token=o9NlNo9UsIWMoSiPVkWa7WRQ2DtiULU7bRkhKJUY-y1iMjbdbbMaIHTcwtFjfO5VBz4hMiSNWVRfD2B110Hm-SAd6QN0JF6y0&amp;id=636527906459698661" target="_blank" rel="noopener">https://www.onenote.com/webapp/pages?token=o9NlNo9UsIWMoSiPVkWa7WRQ2DtiULU7bRkhKJUY-y1iMjbdbbMaIHTcwtFjfO5VBz4hMiSNWVRfD2B110Hm-SAd6QN0JF6y0&amp;id=636527906459698661</a><br>风控相关：<br><a href="https://www.onenote.com/webapp/pages?token=1kmucrge07N8RH-o3TWDk5uYkBvMyfm9M0tXEqz1jsQfXM0Wk71r0bQgNraaMYmBvF0ZUW22VJ7O4CbQKxUH7dQ8-CedT6dU0&amp;id=636527906675057002" target="_blank" rel="noopener">https://www.onenote.com/webapp/pages?token=1kmucrge07N8RH-o3TWDk5uYkBvMyfm9M0tXEqz1jsQfXM0Wk71r0bQgNraaMYmBvF0ZUW22VJ7O4CbQKxUH7dQ8-CedT6dU0&amp;id=636527906675057002</a><br>结算相关：<br><a href="https://www.onenote.com/webapp/pages?token=c_v99edN7EKiwpWBThK0-jF_bXPyvMCsg3Vsa4bf39apKL5dd3TsqfkT1t0xR8YRPotDbMuglnwsVh0xmPaPxPn_mX5x52kp0&amp;id=636527907012381514" target="_blank" rel="noopener">https://www.onenote.com/webapp/pages?token=c_v99edN7EKiwpWBThK0-jF_bXPyvMCsg3Vsa4bf39apKL5dd3TsqfkT1t0xR8YRPotDbMuglnwsVh0xmPaPxPn_mX5x52kp0&amp;id=636527907012381514</a><br>标准化合约：<br><a href="https://www.onenote.com/webapp/pages?token=WkoNW7NpXS0YRNMtk5_GEYjKMEJgxWuyaszfpE1-fTGI46VVg9ZiPPfbrPrCqvbzGza4kWFZxS1PDFHTurfBKzk_3GD0vs4J0&amp;id=636527906177556466" target="_blank" rel="noopener">https://www.onenote.com/webapp/pages?token=WkoNW7NpXS0YRNMtk5_GEYjKMEJgxWuyaszfpE1-fTGI46VVg9ZiPPfbrPrCqvbzGza4kWFZxS1PDFHTurfBKzk_3GD0vs4J0&amp;id=636527906177556466</a><br>相关字段公式请查阅《XB1一期关键字段公式》。</p>
+<h5 id="1-2-定义"><a href="#1-2-定义" class="headerlink" title="1.2. 定义"></a>1.2. 定义</h5><p>篮子下单：对选定的期货品种，可以选择多个账户下单。<br>其他期货相关概念或者参数计算方法请参考以下文档：<br><a href="https://www.onenote.com/webapp/pages?token=ULCWc9v5bc3VJxGVpn8ZebYif0HDEHRNowvMsbVN2EkcTQl_B2YpDeaNEeVM0S51jLB9xz1msd21SIpmHbS3JMUVC2bgDlQ20&amp;id=636527905785427446" target="_blank" rel="noopener">期货</a><br><a href="https://www.onenote.com/webapp/pages?token=o9NlNo9UsIWMoSiPVkWa7WRQ2DtiULU7bRkhKJUY-y1iMjbdbbMaIHTcwtFjfO5VBz4hMiSNWVRfD2B110Hm-SAd6QN0JF6y0&amp;id=636527906459698661" target="_blank" rel="noopener">交易</a><br><a href="https://www.onenote.com/webapp/pages?token=1kmucrge07N8RH-o3TWDk5uYkBvMyfm9M0tXEqz1jsQfXM0Wk71r0bQgNraaMYmBvF0ZUW22VJ7O4CbQKxUH7dQ8-CedT6dU0&amp;id=636527906675057002" target="_blank" rel="noopener">风控</a><br><a href="https://www.onenote.com/webapp/pages?token=c_v99edN7EKiwpWBThK0-jF_bXPyvMCsg3Vsa4bf39apKL5dd3TsqfkT1t0xR8YRPotDbMuglnwsVh0xmPaPxPn_mX5x52kp0&amp;id=636527907012381514" target="_blank" rel="noopener">结算</a><br><a href="https://www.onenote.com/webapp/pages?token=WkoNW7NpXS0YRNMtk5_GEYjKMEJgxWuyaszfpE1-fTGI46VVg9ZiPPfbrPrCqvbzGza4kWFZxS1PDFHTurfBKzk_3GD0vs4J0&amp;id=636527906177556466" target="_blank" rel="noopener">标准化合约</a><br>相关字段公式请查阅《XB1一期关键字段公式》。</p>
 <h4 id="2-总体设计"><a href="#2-总体设计" class="headerlink" title="2. 总体设计"></a>2. 总体设计</h4><h5 id="2-1-需求规定"><a href="#2-1-需求规定" class="headerlink" title="2.1.  需求规定"></a>2.1.  需求规定</h5><p>一期下单功能要求能实盘对接期货交易数据，实现实盘下单。实盘下单支持多账户分别下单，多账户同时下单。风控方面，要求对为期货账户设置的各项参数可设置并且需进行监控，如果账户出现异常及时报警。 </p>
 <h6 id="2-1-1-功能描述"><a href="#2-1-1-功能描述" class="headerlink" title="2.1.1. 功能描述"></a>2.1.1. 功能描述</h6><p>下单页面功能：<br>1.多账号切换；<br>2.呈现出选定账户的收益、盈亏、权益等信息，同时显示标准下单版、未成交单、预埋单、所有委托单、持仓、成交记录；<br>3.下单功能中可以进行篮子下单。<br>风控功能：<br>1.整体持仓，总仓位上限、净持仓上限设置；<br>2.单品种持仓，选择单品种，设置百分比保存；<br>3.分级持仓，对净值区间最大、最小值、日内持仓保证金占计划净值比例、隔夜持仓保证金占计划净值比例、单品种持仓保证金占计划净值比例设置；<br>4.对每一条添加的策略的目标止损值、止盈值、止盈仓位、止损仓位、策略开关设置；<br>5.资金设置，对各期货账户的账户总仓位上限、账户净持仓上限、账户可用资金比例、杠杆率、VAR风险率、触发止损值比例、加权日波动设置。</p>
 <h6 id="2-1-2-性能要求"><a href="#2-1-2-性能要求" class="headerlink" title="2.1.2. 性能要求"></a>2.1.2. 性能要求</h6><p>下单页面：<br>1.进入下单页面切换账号时个数据表切换时间小于0.3s，基本上达到点击完账号数据就变；<br>2.各个点击功能区域点击响应快速，切换效果平滑，不卡顿；<br>风控页面：<br>1.各风控值设定点击确定或保存后即生效。</p>
-<h5 id="2-2-运行环境"><a href="#2-2-运行环境" class="headerlink" title="2.2. 运行环境"></a>2.2. 运行环境</h5><p>前端：支持多系统平台运行，包括windows、Mac、linux。<br>后端：系统linux、windows。<br>网络：目前后台部署在华为云，因其不支持长城宽带，需要在电信宽带环境才能获取到后台数据。<br>硬件环境：部署后台的服务器最好是2核4G以上的配置；<br>具体的项目环境请参考SUNRISE生产环境搭建及部署：<br><a href="http://note.youdao.com/noteshare?id=ec0840cbe4c543273b84757aacbd14c8" target="_blank" rel="noopener">http://note.youdao.com/noteshare?id=ec0840cbe4c543273b84757aacbd14c8</a></p>
+<h5 id="2-2-运行环境"><a href="#2-2-运行环境" class="headerlink" title="2.2. 运行环境"></a>2.2. 运行环境</h5><p>前端：支持多系统平台运行，包括windows、Mac、linux。<br>后端：系统linux、windows。<br>网络：目前后台部署在华为云，因其不支持长城宽带，需要在电信宽带环境才能获取到后台数据。<br>硬件环境：部署后台的服务器最好是2核4G以上的配置；<br>具体的项目环境请参考:SUNRISE项目生产环境搭建及前后端部署<a href="/2018/02/02/SUNRISE项目生产环境搭建及前后端部署/" title="SUNRISE项目生产环境搭建及前后端部署">SUNRISE项目生产环境搭建及前后端部署</a></p>
 <h5 id="2-3-基本设计概念和处理流程"><a href="#2-3-基本设计概念和处理流程" class="headerlink" title="2.3. 基本设计概念和处理流程"></a>2.3. 基本设计概念和处理流程</h5><p><img src="https://ws1.sinaimg.cn/large/006tNc79ly1fnzxfa6qs4j30lw0vumz8.jpg" alt=""></p>
 <h5 id="2-4-结构"><a href="#2-4-结构" class="headerlink" title="2.4. 结构"></a>2.4. 结构</h5><p>前端：<br>项目框架参考蚂蚁金服Alain：<a href="https://cipchk.github.io/ng-alain/dashboard/v1" target="_blank" rel="noopener">https://cipchk.github.io/ng-alain/dashboard/v1</a><br>src中app文件夹内是前端各模块业务代码；assets是项目中用到的图片、声音、国际化字段存储文档；environments文件夹存放开发、测试、正式运行的各项参数；styles是存放前端样式；pagejson记录命令及引用包版本。<br>后端：<br>sanber_api中存放各接口interface；sanber_web中存放各service，业务代码主要放在serviceimpl中；sanber_lts_jobtracker是任务管理器的任务执行部；sanber_lts_admin是任务监控器。</p>
 <h5 id="2-5-功能需求与程序关系"><a href="#2-5-功能需求与程序关系" class="headerlink" title="2.5. 功能需求与程序关系"></a>2.5. 功能需求与程序关系</h5><table>
@@ -400,7 +1004,7 @@
 <ul>
 <li>获取批量订单下单是否符合风控<br>接口：getRiskJudgeByBatch<br>实现思路：先去除账户相同的数据，再循环每条记录的去调：getRiskJudgeCommon判断风控，redis取账户信息中计算参数跟数据库取出的作对比，不符合则报警。</li>
 </ul>
-<p>更多接口信息可查看自动任务说明文档和redis说明文档：<br>自动任务说明文档:<br><a href="https://note.youdao.com/share/?id=55fe0eeed1982cb5ca1571a1f555736c&amp;type=note#/" target="_blank" rel="noopener">https://note.youdao.com/share/?id=55fe0eeed1982cb5ca1571a1f555736c&amp;type=note#/</a><br>redis说明文档：<br><a href="https://note.youdao.com/share/?id=8dcf55d19eebf2a7113ef5f394a4b5c5&amp;type=note#/" target="_blank" rel="noopener">https://note.youdao.com/share/?id=8dcf55d19eebf2a7113ef5f394a4b5c5&amp;type=note#/</a></p>
+<p>更多接口信息可查看自动任务说明文档和redis说明文档：<br>SUNRISE自动任务说明文档<a href="/2018/02/02/SUNRISE自动任务说明文档/" title="SUNRISE自动任务说明文档">SUNRISE自动任务说明文档</a><br>Redis缓存说明文档<a href="/2018/02/02/Redis缓存说明文档/" title="Redis缓存说明文档">Redis缓存说明文档</a></p>
 
           
         
@@ -482,7 +1086,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -495,7 +1099,7 @@
               
               <div class="site-state-item site-state-tags">
                 
-                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">标签</span>
                 
               </div>

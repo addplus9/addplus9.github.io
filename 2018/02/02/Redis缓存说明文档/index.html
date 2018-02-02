@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="redis," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="下单相关 文件位置：CTPRedisUtil类 1.key: ALL_CTP_ORDER作用：存储CTP订单信息。存储场景：1).更新所有委托单： 12String key = AllCTPOrder + ctpRspQryOrder.getAccountId();writeRedisTemplateSlave.opsForHash().put(key,ctpRspQryOrder.getOrde">
+<meta name="keywords" content="redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis缓存说明文档">
+<meta property="og:url" content="http://yoursite.com/2018/02/02/Redis缓存说明文档/index.html">
+<meta property="og:site_name" content="蓝樾博客">
+<meta property="og:description" content="下单相关 文件位置：CTPRedisUtil类 1.key: ALL_CTP_ORDER作用：存储CTP订单信息。存储场景：1).更新所有委托单： 12String key = AllCTPOrder + ctpRspQryOrder.getAccountId();writeRedisTemplateSlave.opsForHash().put(key,ctpRspQryOrder.getOrde">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-02-02T09:31:13.864Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis缓存说明文档">
+<meta name="twitter:description" content="下单相关 文件位置：CTPRedisUtil类 1.key: ALL_CTP_ORDER作用：存储CTP订单信息。存储场景：1).更新所有委托单： 12String key = AllCTPOrder + ctpRspQryOrder.getAccountId();writeRedisTemplateSlave.opsForHash().put(key,ctpRspQryOrder.getOrde">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/02/02/Redis缓存说明文档/"/>
+
+
+
+
+
+  <title>Redis缓存说明文档 | 蓝樾博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">蓝樾博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/02/Redis缓存说明文档/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="addplus9">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝樾博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Redis缓存说明文档</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-02T16:50:46+08:00">
+                2018-02-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><strong>下单相关</strong></p>
+<p>文件位置：CTPRedisUtil类</p>
+<h6 id="1-key-ALL-CTP-ORDER"><a href="#1-key-ALL-CTP-ORDER" class="headerlink" title="1.key: ALL_CTP_ORDER"></a>1.key: ALL_CTP_ORDER</h6><p>作用：存储CTP订单信息。<br>存储场景：<br>1).更新所有委托单：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String key = AllCTPOrder + ctpRspQryOrder.getAccountId();</span><br><span class="line">writeRedisTemplateSlave.opsForHash().put(key,ctpRspQryOrder.getOrderLocalID(),ctpRspQryOrder);</span><br></pre></td></tr></table></figure>
+<p>调用场景：<br>1).获取所有委托单：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取所有委托单</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-34-31 下午3:34</span><br><span class="line"> */</span><br><span class="line">public List getAllCTPOrder(String accountId)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = AllCTPOrder + accountId ;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>2).交易报表根据id取报单数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 获取报单记录</span><br><span class="line">allQryOrder.put(qryTrade.getOrderLocalID(), ctpRedisUtil.getCTPOrderByOrderLocalID(accountInfo.getAccountID(), qryTrade.getOrderLocalID()));</span><br></pre></td></tr></table></figure></p>
+<p>清除数据场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public Result run(JobContext jobContext)&#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        ctpRedisUtil.deleteAllOrderAndTrade();</span><br><span class="line">        return new Result(Action.EXECUTE_SUCCESS, &quot;CTP删除所有报单和成交记录任务成功&quot;);</span><br><span class="line">    &#125; catch (Exception e) &#123;</span><br><span class="line">        logger.error(&quot;CTP删除所有报单任务失败&quot;);</span><br><span class="line">        return new Result(Action.EXECUTE_FAILED,&quot;CTP删除所有报单和成交记录任务失败&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="2-key-WORKING-CTP-ORDER"><a href="#2-key-WORKING-CTP-ORDER" class="headerlink" title="2.key:WORKING_CTP_ORDER"></a>2.key:WORKING_CTP_ORDER</h6><p>作用：存储未成交单信息。<br>存储场景：<br>1).更新工作委托单(可以撤单):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String key = WorkingCTPOrder + ctpRspQryOrder.getAccountId();</span><br><span class="line">writeRedisTemplateSlave.opsForHash().put(key,ctpRspQryOrder.getOrderLocalID(),ctpRspQryOrder);</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取所有工作委托单</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2018-20-01 下午2:20</span><br><span class="line"> */</span><br><span class="line">public List getWorkingOrders(String userId)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = WorkingCTPOrder + userId ;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//更新所有委托单时若查询CTP订单状态为： THOST_FTDC_OST_AllTraded--全部成交、THOST_FTDC_OST_Canceled--撤单、THOST_FTDC_OST_Touched--已触发、THOST_FTDC_OST_PartTradedNotQueueing--部分成交不在队列中</span><br><span class="line">if(cThostFtdcOrderField.getOrderStatus() == CTPConstant.THOST_FTDC_OST_AllTraded</span><br><span class="line">                || cThostFtdcOrderField.getOrderStatus() == CTPConstant.THOST_FTDC_OST_Canceled</span><br><span class="line">                || cThostFtdcOrderField.getOrderStatus() == CTPConstant.THOST_FTDC_OST_Touched</span><br><span class="line">                || cThostFtdcOrderField.getOrderStatus() == CTPConstant.THOST_FTDC_OST_PartTradedNotQueueing)</span><br><span class="line">&#123;</span><br><span class="line">                this.deleteWorkingOrder(ctpRspQryOrder);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="3-key-WAIT-CTP-ORDER"><a href="#3-key-WAIT-CTP-ORDER" class="headerlink" title="3.key:WAIT_CTP_ORDER"></a>3.key:WAIT_CTP_ORDER</h6><p>作用：存储预埋单信息。<br>存储场景：<br>1).更新预埋单:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">String key = WaitCTPOrder + ctpRspQryOrder.getAccountId();</span><br><span class="line">if(ctpRspQryOrder.getOrderStauts()!= &apos;3&apos;)&#123;</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().put(key,ctpRspQryOrder.getOrderLocalID(),ctpRspQryOrder);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用缓存数据场景：<br>1).获取预埋单：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line">     *description: 获取预埋条件单</span><br><span class="line">     *author: wlb</span><br><span class="line">     *date: 2018-17-01 下午4:17</span><br><span class="line">     */</span><br><span class="line">    public List getWaitOrders(String accountId)&#123;</span><br><span class="line">        RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">        String key = WaitCTPOrder + accountId;</span><br><span class="line">        return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>删除缓存场景：<br>1).预埋单成交更改预埋单状态：</p>
+<p>2).每天五点清除所有订单缓存定时任务清除：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public void deleteAllOrderAndTrade() throws Exception&#123;</span><br><span class="line">        RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">        List&lt;XbAccount&gt; accounts = accountService.getAccountList();</span><br><span class="line">        for (XbAccount xbAccount : accounts)&#123;</span><br><span class="line">            String accountId = xbAccount.getAccount();</span><br><span class="line">            String waitkey = WaitCTPOrder + accountId ;</span><br><span class="line">            String workkey = WorkingCTPOrder + accountId;</span><br><span class="line">            String allWorderkey = AllCTPOrder + accountId;</span><br><span class="line">            String allTradekey = AllCTPTrade + accountId;</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(waitkey);</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(workkey);</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(allWorderkey);</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(allTradekey);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="4-key-ALL-CTP-TRADE"><a href="#4-key-ALL-CTP-TRADE" class="headerlink" title="4.key:ALL_CTP_TRADE"></a>4.key:ALL_CTP_TRADE</h6><p>作用：存储成交单信息。<br>存储场景：<br>1).更新成交记录:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String key = AllCTPTrade + ctpRspQryTrade.getAccountId();</span><br><span class="line">writeRedisTemplateSlave.opsForHash().put(key,ctpRspQryTrade.getOrderLocalID(),ctpRspQryTrade);</span><br></pre></td></tr></table></figure></p>
+<p>调用数据场景：<br>1).获取所有成交记<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取所有成交记录列表</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2018-45-01 下午7:45</span><br><span class="line"> */</span><br><span class="line">public List getAllCTPTrade(String accountId)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = AllCTPTrade + accountId ;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>删除缓存数据场景：<br>1).每天五点的定时任务CTPDayDeleteAllOrderAndTrade清除订单缓存<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public void deleteAllOrderAndTrade() throws Exception&#123;</span><br><span class="line">        RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">        List&lt;XbAccount&gt; accounts = accountService.getAccountList();</span><br><span class="line">        for (XbAccount xbAccount : accounts)&#123;</span><br><span class="line">            String accountId = xbAccount.getAccount();</span><br><span class="line">            String waitkey = WaitCTPOrder + accountId ;</span><br><span class="line">            String workkey = WorkingCTPOrder + accountId;</span><br><span class="line">            String allWorderkey = AllCTPOrder + accountId;</span><br><span class="line">            String allTradekey = AllCTPTrade + accountId;</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(waitkey);</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(workkey);</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(allWorderkey);</span><br><span class="line">            writeRedisTemplateSlave.opsForHash().delete(allTradekey);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="5-key-CTP-POSITION"><a href="#5-key-CTP-POSITION" class="headerlink" title="5.key:CTP_POSITION"></a>5.key:CTP_POSITION</h6><p>作用：存储账号持仓信息。<br>存储场景：<br>1).更新持仓:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String key =CTPPosition +  xbCTPPosition.getInvestorID();</span><br><span class="line">writeRedisTemplateSlave.opsForHash().put(key,xbCTPPosition.getInstrumentID()+&quot;_&quot;+xbCTPPosition.getPosiDirection(),xbCTPPosition);</span><br></pre></td></tr></table></figure></p>
+<p>调用数据场景：<br>1).获取所有持仓<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取所有持仓</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public List getCTPPosition(String accountId)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = CTPPosition + accountId;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>2).获取指定持仓：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取指定持仓</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 18-1-23 下午3:53</span><br><span class="line"> */</span><br><span class="line">public XbCTPPosition getCTPPositionByInstrumentId(String accountId,String instrumentId,Character direction)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = CTPPosition + accountId;</span><br><span class="line">    return  (XbCTPPosition) readRedisTemplateSlave.opsForHash().get(key,instrumentId+&quot;_&quot;+direction);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>删除缓存数据场景：<br>1).查询持仓信息，发现持仓为零时清除缓存数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 删除持仓</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public void deleteCTPPosition(XbCTPPosition xbCTPPosition)&#123;</span><br><span class="line">    RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">    String key = CTPPosition + xbCTPPosition.getInvestorID();</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().delete(key,xbCTPPosition.getInstrumentID()+&quot;_&quot;+xbCTPPosition.getPosiDirection());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>2).CTP删除持仓任务：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public Result run(JobContext jobContext) throws Throwable &#123;</span><br><span class="line"></span><br><span class="line">    List&lt;XbAccount&gt; list = accountService.getAccountList();</span><br><span class="line">    for(XbAccount xbAccount : list)&#123;</span><br><span class="line">        ctpRedisUtil.deleteAllPostition(xbAccount.getAccount());</span><br><span class="line">    &#125;</span><br><span class="line">    return new Result(Action.EXECUTE_SUCCESS, &quot;CTP删除持仓任务成功&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="6-key-CTP-AccountInfos"><a href="#6-key-CTP-AccountInfos" class="headerlink" title="6.key:CTP_AccountInfos"></a>6.key:CTP_AccountInfos</h6><p>作用：存储账号信息。<br>存储场景：<br>1).更新账号信息:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 更新账号信息</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public void updateCTPAccountInfo(XbCTPAccountInfo xbCTPAccountInfo)&#123;</span><br><span class="line">    RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">    String key =  CTPAccountInfos;</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().put(key,xbCTPAccountInfo.getAccountID(),xbCTPAccountInfo);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br>1).获取账号信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取账号信息列表</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public List getCTPAccountInfoList()&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = CTPAccountInfos;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">账号信息一般不删</span><br></pre></td></tr></table></figure></p>
+<h6 id="7-key-MarketData"><a href="#7-key-MarketData" class="headerlink" title="7.key:MarketData"></a>7.key:MarketData</h6><p>作用：存储行情数据。<br>存储场景：<br>1).更新行情数据:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 更新行情数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public void updateMarketData(CTPMarketData ctpMarketData)&#123;</span><br><span class="line">    RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">    String key =  MarketData;</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().put(key,ctpMarketData.getInstrumentID(),ctpMarketData);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br>1).获取行情数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取行情数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public CTPMarketData getMarketData(String instrumentID)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = MarketData;</span><br><span class="line">    return (CTPMarketData)readRedisTemplateSlave.opsForHash().get(key,instrumentID);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">行情信息一般不删</span><br></pre></td></tr></table></figure></p>
+<h6 id="8-key-CTPInstrumentData"><a href="#8-key-CTPInstrumentData" class="headerlink" title="8.key:CTPInstrumentData"></a>8.key:CTPInstrumentData</h6><p>作用：存储合约数据。<br>存储场景：<br>1).更新合约数据:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> /**</span><br><span class="line"> *description: 更新合约数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public void updateInstrumentData(XbFuturesInstrument xbFuturesInstrument)&#123;</span><br><span class="line">    RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">    String key =  CTPInstrumentData;</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().put(key,xbFuturesInstrument.getInstrumentID(),xbFuturesInstrument);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br>1).获取合约数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取所有合约数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public List getAllInstrumentData()&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = CTPInstrumentData;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">合约信息一般不删</span><br></pre></td></tr></table></figure></p>
+<h6 id="9-key-CTPInstrumentData"><a href="#9-key-CTPInstrumentData" class="headerlink" title="9.key:CTPInstrumentData"></a>9.key:CTPInstrumentData</h6><p>作用：存储产品数据。<br>存储场景：<br>1).更新产品数据:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> /**</span><br><span class="line"> *description: 更新产品数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public void updateProductData(XbFuturesProduct xbFuturesProduct)&#123;</span><br><span class="line">    RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">    String key =  CTPProductData;</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().put(key,xbFuturesProduct.getProductID(),xbFuturesProduct);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br>1).获取产品数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取所有产品数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public List getAllProductData()&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = CTPProductData;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">合约信息一般不删</span><br></pre></td></tr></table></figure></p>
+<h6 id="10-key-CTPInstrumentMarginRate"><a href="#10-key-CTPInstrumentMarginRate" class="headerlink" title="10.key:CTPInstrumentMarginRate"></a>10.key:CTPInstrumentMarginRate</h6><p>作用：存储合约保证金数据。<br>存储场景：<br>1).更新合约保证金数据:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> /**</span><br><span class="line"> *description: 更新合约保证金数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public void updateCTPInstrumentMarginRate(CTPInstrumentMarginRateField ctpInstrumentMarginRateField)&#123;</span><br><span class="line">    RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">    String key =  CTPInstrumentMarginRate + ctpInstrumentMarginRateField.getInvestorID();</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().put(key,ctpInstrumentMarginRateField.getInstrumentID()+&quot;_&quot;+ctpInstrumentMarginRateField.getHedgeFlag(),ctpInstrumentMarginRateField);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br>1).获取合约保证金数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取所有保证金数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public List getAllCTPInstrumentMarginRate(String accountId)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = CTPInstrumentMarginRate + accountId;</span><br><span class="line">    return readRedisTemplateSlave.opsForHash().values(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">合约信息一般不删</span><br></pre></td></tr></table></figure></p>
+<h6 id="11-key-CTPInstrumentCommissionRate"><a href="#11-key-CTPInstrumentCommissionRate" class="headerlink" title="11.key:CTPInstrumentCommissionRate"></a>11.key:CTPInstrumentCommissionRate</h6><p>作用：存储合约手续费数据。<br>存储场景：<br>1).更新合约手续费数据:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> /**</span><br><span class="line"> *description: 更新合约手续费数据</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public void updateInstrumentCommissionRate(CTPInstrumentCommissionRateField ctpInstrumentCommissionRateField)&#123;</span><br><span class="line">    RedisTemplate writeRedisTemplateSlave =  redisSlaveTemplateManager.getMasterTemplate();</span><br><span class="line">    String key =  CTPInstrumentCommissionRate;</span><br><span class="line">    writeRedisTemplateSlave.opsForHash().put(key,ctpInstrumentCommissionRateField.getInstrumentID(),ctpInstrumentCommissionRateField);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br>1).获取合约手续费数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *description: 获取手续费数据(productId是产品ID：比如zn1806就是zn)</span><br><span class="line"> *author: wlb</span><br><span class="line"> *date: 2017-51-31 下午3:51</span><br><span class="line"> */</span><br><span class="line">public CTPInstrumentCommissionRateField getInstrumentCommissionRate(String productId)&#123;</span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String key = CTPInstrumentCommissionRate;</span><br><span class="line">    return (CTPInstrumentCommissionRateField)readRedisTemplateSlave.opsForHash().get(key,productId);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">合约信息一般不删</span><br></pre></td></tr></table></figure></p>
+<h6 id="11-key-ALLCHILD-INSTRUMENT-JSONDATA"><a href="#11-key-ALLCHILD-INSTRUMENT-JSONDATA" class="headerlink" title="11.key:ALLCHILD_INSTRUMENT_JSONDATA"></a>11.key:ALLCHILD_INSTRUMENT_JSONDATA</h6><p>作用：存储模糊查询合约数据。<br>存储场景：<br>1).查询合约回报时初始化合约数据，所有合约数据转成JSON存入redis:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">writeRedisTemplateSlave.opsForValue().set(ALLCHILD_INSTRUMENT_JSONDATA,JSON.toJSONString(allInstrumentDataList));</span><br></pre></td></tr></table></figure></p>
+<p>调用场景：<br>1).获取合约数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public JSONObject getAllInstrmentData() &#123;</span><br><span class="line"></span><br><span class="line">    JSONObject jsonObject = new JSONObject();</span><br><span class="line"></span><br><span class="line">    RedisTemplate readRedisTemplateSlave =  redisSlaveTemplateManager.getSlaveTemlate();</span><br><span class="line">    String jsonStr = (String)readRedisTemplateSlave.opsForValue().get(INSTRUMENT_JSONDATA);</span><br><span class="line">    String allStr = (String)readRedisTemplateSlave.opsForValue().get(ALLCHILD_INSTRUMENT_JSONDATA);</span><br><span class="line">    List&lt;SelectData&gt; selectDataList = (List&lt;SelectData&gt;)JSON.parse(jsonStr);</span><br><span class="line">    List&lt;InstrumentData&gt; instrumentDatas = (List&lt;InstrumentData&gt;)JSON.parse(allStr);</span><br><span class="line"></span><br><span class="line">    jsonObject.put(&quot;zlList&quot;,selectDataList);</span><br><span class="line">    jsonObject.put(&quot;zlAllList&quot;,instrumentDatas);</span><br><span class="line"></span><br><span class="line">    return jsonObject;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">合约信息一般不删</span><br></pre></td></tr></table></figure></p>
+<h6 id="12-key-ctp-risk-manager-position"><a href="#12-key-ctp-risk-manager-position" class="headerlink" title="12.key:ctp_risk_manager_position"></a>12.key:ctp_risk_manager_position</h6><p>作用：风控所需数据。<br>存储场景：<br>1).风险管理-持仓设置自动任务向redis写入数据:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">//更新redis里面用户消息</span><br><span class="line">Map map = DataUtils.beanToMap(ctpRiskManager);</span><br><span class="line">redisTemplate.opsForHash().putAll(StringConstant.CTP_RISK_MANAGERT_DATA + xbAccount.getId(), map);</span><br></pre></td></tr></table></figure></p>
+<p>调用缓存场景：<br>1).获取仓位上限：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">positionLimit = (double) hashOperations.get(StringConstant.CTP_RISK_MANAGERT_DATA + accountId, &quot;totalPositionLimit&quot;);</span><br></pre></td></tr></table></figure></p>
+<p>2).获取单品种持仓上限：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HashMap hashMap = (HashMap) hashOperations.get(StringConstant.CTP_RISK_MANAGERT_DATA + accountId, &quot;siglePositionTopLimit&quot;);</span><br></pre></td></tr></table></figure></p>
+<p>3).获取隔夜持仓保证金：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">positionRatio = (double) hashOperations.get(StringConstant.CTP_RISK_MANAGERT_DATA + accountId, &quot;oPositionRatio&quot;);</span><br><span class="line">setPositionRatio = xbRiskLevel.getoPositionRatio();</span><br></pre></td></tr></table></figure></p>
+<p>4).获取日内持仓保证金：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#获取日内持仓保证金</span><br><span class="line">positionRatio = (double) hashOperations.get(StringConstant.CTP_RISK_MANAGERT_DATA + accountId, &quot;tPositionRatio&quot;);</span><br><span class="line">setPositionRatio = xbRiskLevel.gettPositionRatio();</span><br></pre></td></tr></table></figure>
+<p>5).获取单品种持仓保证金：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">positionRatio = (double) hashOperations.get(StringConstant.CTP_RISK_MANAGERT_DATA + accountId, &quot;sPositionRatio&quot;);</span><br><span class="line">setPositionRatio = xbRiskLevel.getsPositionRatio();</span><br></pre></td></tr></table></figure>
+<p>6).获取账号总仓位上限：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">positionLimit = (double) hashOperations.get(StringConstant.CTP_RISK_MANAGERT_DATA + accountId, &quot;totalPositionLimit&quot;);</span><br><span class="line">setPositionLimit = xbAccountRisk.getTotalPositionLimit();</span><br></pre></td></tr></table></figure></p>
+<p>7).获取账号净持仓上限:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">positionLimit = (double) hashOperations.get(StringConstant.CTP_RISK_MANAGERT_DATA + accountId, &quot;netEquityPositionLimit&quot;);</span><br><span class="line">setPositionLimit = xbAccountRisk.getNetEquityPositionLimit();</span><br></pre></td></tr></table></figure></p>
+<p>缓存清除场景：</p>
+<h6 id="13-key-shiro-redis-cache"><a href="#13-key-shiro-redis-cache" class="headerlink" title="13.key:shiro_redis_cache"></a>13.key:shiro_redis_cache</h6><p>作用：<br>存储场景：<br>调用场景：<br>缓存清除场景：</p>
+<h6 id="14-key-shiro-redis-session"><a href="#14-key-shiro-redis-session" class="headerlink" title="14.key:shiro_redis_session"></a>14.key:shiro_redis_session</h6><p>作用：<br>存储场景：<br>调用场景：<br>缓存清除场景：</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag"># redis</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/02/SUNRISE自动任务说明文档/" rel="next" title="SUNRISE自动任务说明文档">
+                <i class="fa fa-chevron-left"></i> SUNRISE自动任务说明文档
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">addplus9</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-6"><a class="nav-link" href="#1-key-ALL-CTP-ORDER"><span class="nav-number">1.</span> <span class="nav-text">1.key: ALL_CTP_ORDER</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-key-WORKING-CTP-ORDER"><span class="nav-number">2.</span> <span class="nav-text">2.key:WORKING_CTP_ORDER</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-key-WAIT-CTP-ORDER"><span class="nav-number">3.</span> <span class="nav-text">3.key:WAIT_CTP_ORDER</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#4-key-ALL-CTP-TRADE"><span class="nav-number">4.</span> <span class="nav-text">4.key:ALL_CTP_TRADE</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#5-key-CTP-POSITION"><span class="nav-number">5.</span> <span class="nav-text">5.key:CTP_POSITION</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#6-key-CTP-AccountInfos"><span class="nav-number">6.</span> <span class="nav-text">6.key:CTP_AccountInfos</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#7-key-MarketData"><span class="nav-number">7.</span> <span class="nav-text">7.key:MarketData</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#8-key-CTPInstrumentData"><span class="nav-number">8.</span> <span class="nav-text">8.key:CTPInstrumentData</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#9-key-CTPInstrumentData"><span class="nav-number">9.</span> <span class="nav-text">9.key:CTPInstrumentData</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#10-key-CTPInstrumentMarginRate"><span class="nav-number">10.</span> <span class="nav-text">10.key:CTPInstrumentMarginRate</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#11-key-CTPInstrumentCommissionRate"><span class="nav-number">11.</span> <span class="nav-text">11.key:CTPInstrumentCommissionRate</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#11-key-ALLCHILD-INSTRUMENT-JSONDATA"><span class="nav-number">12.</span> <span class="nav-text">11.key:ALLCHILD_INSTRUMENT_JSONDATA</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#12-key-ctp-risk-manager-position"><span class="nav-number">13.</span> <span class="nav-text">12.key:ctp_risk_manager_position</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#13-key-shiro-redis-cache"><span class="nav-number">14.</span> <span class="nav-text">13.key:shiro_redis_cache</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#14-key-shiro-redis-session"><span class="nav-number">15.</span> <span class="nav-text">14.key:shiro_redis_session</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">addplus9</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
