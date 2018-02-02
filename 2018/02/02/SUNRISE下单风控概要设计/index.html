@@ -88,7 +88,7 @@
 <meta property="og:description" content="1. 引言SUNRISR系统一期，是为相变投资团队量身打造的集用户管理、角色管理、菜单资源管理、基金账户管理、下单、风控报表、交易报表、策略风控、消息通知为一体的工作平台,本篇文档侧重介绍下单、风控相关的业务需求，项目结构及代码位置。 1.1. 编写目的本篇文档概要介绍SUNRISE系统中的下单、风控的业务流程和功能，描述主要接口。阅读人员为初次接触本系统的开发者。 1.2. 定义篮子下单：对选定">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://ws1.sinaimg.cn/large/006tNc79ly1fnzxfa6qs4j30lw0vumz8.jpg">
-<meta property="og:updated_time" content="2018-02-02T08:58:47.066Z">
+<meta property="og:updated_time" content="2018-02-02T09:53:54.622Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SUNRISE下单风控概要设计">
 <meta name="twitter:description" content="1. 引言SUNRISR系统一期，是为相变投资团队量身打造的集用户管理、角色管理、菜单资源管理、基金账户管理、下单、风控报表、交易报表、策略风控、消息通知为一体的工作平台,本篇文档侧重介绍下单、风控相关的业务需求，项目结构及代码位置。 1.1. 编写目的本篇文档概要介绍SUNRISE系统中的下单、风控的业务流程和功能，描述主要接口。阅读人员为初次接触本系统的开发者。 1.2. 定义篮子下单：对选定">
@@ -302,13 +302,13 @@
       
 
       
-        <h4 id="1-引言"><a href="#1-引言" class="headerlink" title="1. 引言"></a>1. 引言</h4><p>SUNRISR系统一期，是为相变投资团队量身打造的集用户管理、角色管理、菜单资源管理、基金账户管理、下单、风控报表、交易报表、策略风控、消息通知为一体的<br>工作平台,本篇文档侧重介绍下单、风控相关的业务需求，项目结构及代码位置。</p>
+        <h4 id="1-引言"><a href="#1-引言" class="headerlink" title="1. 引言"></a>1. 引言</h4><p>SUNRISR系统一期，是为相变投资团队量身打造的集用户管理、角色管理、菜单资源管理、基金账户管理、下单、风控报表、交易报表、策略风控、消息通知为一体的工作平台,本篇文档侧重介绍下单、风控相关的业务需求，项目结构及代码位置。</p>
 <h5 id="1-1-编写目的"><a href="#1-1-编写目的" class="headerlink" title="1.1. 编写目的"></a>1.1. 编写目的</h5><p>本篇文档概要介绍SUNRISE系统中的下单、风控的业务流程和功能，描述主要接口。阅读人员为初次接触本系统的开发者。</p>
 <h5 id="1-2-定义"><a href="#1-2-定义" class="headerlink" title="1.2. 定义"></a>1.2. 定义</h5><p>篮子下单：对选定的期货品种，可以选择多个账户下单。<br>其他期货相关概念或者参数计算方法请参考以下文档：<br><a href="https://www.onenote.com/webapp/pages?token=ULCWc9v5bc3VJxGVpn8ZebYif0HDEHRNowvMsbVN2EkcTQl_B2YpDeaNEeVM0S51jLB9xz1msd21SIpmHbS3JMUVC2bgDlQ20&amp;id=636527905785427446" target="_blank" rel="noopener">期货</a><br><a href="https://www.onenote.com/webapp/pages?token=o9NlNo9UsIWMoSiPVkWa7WRQ2DtiULU7bRkhKJUY-y1iMjbdbbMaIHTcwtFjfO5VBz4hMiSNWVRfD2B110Hm-SAd6QN0JF6y0&amp;id=636527906459698661" target="_blank" rel="noopener">交易</a><br><a href="https://www.onenote.com/webapp/pages?token=1kmucrge07N8RH-o3TWDk5uYkBvMyfm9M0tXEqz1jsQfXM0Wk71r0bQgNraaMYmBvF0ZUW22VJ7O4CbQKxUH7dQ8-CedT6dU0&amp;id=636527906675057002" target="_blank" rel="noopener">风控</a><br><a href="https://www.onenote.com/webapp/pages?token=c_v99edN7EKiwpWBThK0-jF_bXPyvMCsg3Vsa4bf39apKL5dd3TsqfkT1t0xR8YRPotDbMuglnwsVh0xmPaPxPn_mX5x52kp0&amp;id=636527907012381514" target="_blank" rel="noopener">结算</a><br><a href="https://www.onenote.com/webapp/pages?token=WkoNW7NpXS0YRNMtk5_GEYjKMEJgxWuyaszfpE1-fTGI46VVg9ZiPPfbrPrCqvbzGza4kWFZxS1PDFHTurfBKzk_3GD0vs4J0&amp;id=636527906177556466" target="_blank" rel="noopener">标准化合约</a><br>相关字段公式请查阅《XB1一期关键字段公式》。</p>
 <h4 id="2-总体设计"><a href="#2-总体设计" class="headerlink" title="2. 总体设计"></a>2. 总体设计</h4><h5 id="2-1-需求规定"><a href="#2-1-需求规定" class="headerlink" title="2.1.  需求规定"></a>2.1.  需求规定</h5><p>一期下单功能要求能实盘对接期货交易数据，实现实盘下单。实盘下单支持多账户分别下单，多账户同时下单。风控方面，要求对为期货账户设置的各项参数可设置并且需进行监控，如果账户出现异常及时报警。 </p>
 <h6 id="2-1-1-功能描述"><a href="#2-1-1-功能描述" class="headerlink" title="2.1.1. 功能描述"></a>2.1.1. 功能描述</h6><p>下单页面功能：<br>1.多账号切换；<br>2.呈现出选定账户的收益、盈亏、权益等信息，同时显示标准下单版、未成交单、预埋单、所有委托单、持仓、成交记录；<br>3.下单功能中可以进行篮子下单。<br>风控功能：<br>1.整体持仓，总仓位上限、净持仓上限设置；<br>2.单品种持仓，选择单品种，设置百分比保存；<br>3.分级持仓，对净值区间最大、最小值、日内持仓保证金占计划净值比例、隔夜持仓保证金占计划净值比例、单品种持仓保证金占计划净值比例设置；<br>4.对每一条添加的策略的目标止损值、止盈值、止盈仓位、止损仓位、策略开关设置；<br>5.资金设置，对各期货账户的账户总仓位上限、账户净持仓上限、账户可用资金比例、杠杆率、VAR风险率、触发止损值比例、加权日波动设置。</p>
 <h6 id="2-1-2-性能要求"><a href="#2-1-2-性能要求" class="headerlink" title="2.1.2. 性能要求"></a>2.1.2. 性能要求</h6><p>下单页面：<br>1.进入下单页面切换账号时个数据表切换时间小于0.3s，基本上达到点击完账号数据就变；<br>2.各个点击功能区域点击响应快速，切换效果平滑，不卡顿；<br>风控页面：<br>1.各风控值设定点击确定或保存后即生效。</p>
-<h5 id="2-2-运行环境"><a href="#2-2-运行环境" class="headerlink" title="2.2. 运行环境"></a>2.2. 运行环境</h5><p>前端：支持多系统平台运行，包括windows、Mac、linux。<br>后端：系统linux、windows。<br>网络：目前后台部署在华为云，因其不支持长城宽带，需要在电信宽带环境才能获取到后台数据。<br>硬件环境：部署后台的服务器最好是2核4G以上的配置；<br>具体的项目环境请参考:SUNRISE项目生产环境搭建及前后端部署<a href="/2018/02/02/SUNRISE项目生产环境搭建及前后端部署/" title="SUNRISE项目生产环境搭建及前后端部署">SUNRISE项目生产环境搭建及前后端部署</a></p>
+<h5 id="2-2-运行环境"><a href="#2-2-运行环境" class="headerlink" title="2.2. 运行环境"></a>2.2. 运行环境</h5><p>前端：支持多系统平台运行，包括windows、Mac、linux。<br>后端：系统linux、windows。<br>网络：目前后台部署在华为云，因其不支持长城宽带，需要在电信宽带环境才能获取到后台数据。<br>硬件环境：部署后台的服务器最好是2核4G以上的配置；<br>具体的项目环境请参考:<a href="/2018/02/02/SUNRISE项目生产环境搭建及前后端部署/" title="SUNRISE项目生产环境搭建及前后端部署">SUNRISE项目生产环境搭建及前后端部署</a></p>
 <h5 id="2-3-基本设计概念和处理流程"><a href="#2-3-基本设计概念和处理流程" class="headerlink" title="2.3. 基本设计概念和处理流程"></a>2.3. 基本设计概念和处理流程</h5><p><img src="https://ws1.sinaimg.cn/large/006tNc79ly1fnzxfa6qs4j30lw0vumz8.jpg" alt=""></p>
 <h5 id="2-4-结构"><a href="#2-4-结构" class="headerlink" title="2.4. 结构"></a>2.4. 结构</h5><p>前端：<br>项目框架参考蚂蚁金服Alain：<a href="https://cipchk.github.io/ng-alain/dashboard/v1" target="_blank" rel="noopener">https://cipchk.github.io/ng-alain/dashboard/v1</a><br>src中app文件夹内是前端各模块业务代码；assets是项目中用到的图片、声音、国际化字段存储文档；environments文件夹存放开发、测试、正式运行的各项参数；styles是存放前端样式；pagejson记录命令及引用包版本。<br>后端：<br>sanber_api中存放各接口interface；sanber_web中存放各service，业务代码主要放在serviceimpl中；sanber_lts_jobtracker是任务管理器的任务执行部；sanber_lts_admin是任务监控器。</p>
 <h5 id="2-5-功能需求与程序关系"><a href="#2-5-功能需求与程序关系" class="headerlink" title="2.5. 功能需求与程序关系"></a>2.5. 功能需求与程序关系</h5><table>
@@ -402,7 +402,7 @@
 <ul>
 <li>获取批量订单下单是否符合风控<br>接口：getRiskJudgeByBatch<br>实现思路：先去除账户相同的数据，再循环每条记录的去调：getRiskJudgeCommon判断风控，redis取账户信息中计算参数跟数据库取出的作对比，不符合则报警。</li>
 </ul>
-<p>更多接口信息可查看自动任务说明文档和redis说明文档：<br>SUNRISE自动任务说明文档<a href="/2018/02/02/SUNRISE自动任务说明文档/" title="SUNRISE自动任务说明文档">SUNRISE自动任务说明文档</a><br>Redis缓存说明文档<a href="/2018/02/02/Redis缓存说明文档/" title="Redis缓存说明文档">Redis缓存说明文档</a></p>
+<p>更多接口信息可查看自动任务说明文档和redis说明文档：<br><a href="/2018/02/02/SUNRISE自动任务说明文档/" title="SUNRISE自动任务说明文档">SUNRISE自动任务说明文档</a><br><a href="/2018/02/02/Redis缓存说明文档/" title="Redis缓存说明文档">Redis缓存说明文档</a></p>
 
       
     </div>
