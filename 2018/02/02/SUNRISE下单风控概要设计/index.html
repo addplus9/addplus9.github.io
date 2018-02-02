@@ -5,7 +5,7 @@
   
 
 
-<html class="theme-next muse use-motion" lang="">
+<html class="theme-next muse use-motion" lang="zh-CN">
 <head>
   <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -86,12 +86,13 @@
 <meta property="og:url" content="http://yoursite.com/2018/02/02/SUNRISE下单风控概要设计/index.html">
 <meta property="og:site_name" content="蓝樾博客">
 <meta property="og:description" content="1. 引言SUNRISR系统一期，是为相变投资团队量身打造的集用户管理、角色管理、菜单资源管理、基金账户管理、下单、风控报表、交易报表、策略风控、消息通知为一体的工作平台,本篇文档侧重介绍下单、风控相关的业务需求，项目结构及代码位置。 1.1. 编写目的本篇文档概要介绍SUNRISE系统中的下单、风控的业务流程和功能，描述主要接口。阅读人员为初次接触本系统的开发者。 1.2. 定义篮子下单：对选定">
-<meta property="og:image" content="http://note.youdao.com/noteshare?id=ec0840cbe4c543273b84757aacbd14c8">
-<meta property="og:updated_time" content="2018-02-02T05:40:15.373Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://ws1.sinaimg.cn/large/006tNc79ly1fnzxfa6qs4j30lw0vumz8.jpg">
+<meta property="og:updated_time" content="2018-02-02T06:01:34.256Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SUNRISE下单风控概要设计">
 <meta name="twitter:description" content="1. 引言SUNRISR系统一期，是为相变投资团队量身打造的集用户管理、角色管理、菜单资源管理、基金账户管理、下单、风控报表、交易报表、策略风控、消息通知为一体的工作平台,本篇文档侧重介绍下单、风控相关的业务需求，项目结构及代码位置。 1.1. 编写目的本篇文档概要介绍SUNRISE系统中的下单、风控的业务流程和功能，描述主要接口。阅读人员为初次接触本系统的开发者。 1.2. 定义篮子下单：对选定">
-<meta name="twitter:image" content="http://note.youdao.com/noteshare?id=ec0840cbe4c543273b84757aacbd14c8">
+<meta name="twitter:image" content="https://ws1.sinaimg.cn/large/006tNc79ly1fnzxfa6qs4j30lw0vumz8.jpg">
 
 
 
@@ -107,7 +108,7 @@
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     duoshuo: {
       userId: '0',
-      author: 'Author'
+      author: '博主'
     },
     algolia: {
       applicationID: '',
@@ -139,7 +140,7 @@
 
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="">
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
 
   
   
@@ -187,7 +188,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            首页
           </a>
         </li>
       
@@ -197,7 +198,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            归档
           </a>
         </li>
       
@@ -261,9 +262,9 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">发表于</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-02-02T11:55:07+08:00">
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-02T11:55:07+08:00">
                 2018-02-02
               </time>
             
@@ -308,7 +309,7 @@
 <h6 id="2-1-1-功能描述"><a href="#2-1-1-功能描述" class="headerlink" title="2.1.1. 功能描述"></a>2.1.1. 功能描述</h6><p>下单页面功能：<br>1.多账号切换；<br>2.呈现出选定账户的收益、盈亏、权益等信息，同时显示标准下单版、未成交单、预埋单、所有委托单、持仓、成交记录；<br>3.下单功能中可以进行篮子下单。<br>风控功能：<br>1.整体持仓，总仓位上限、净持仓上限设置；<br>2.单品种持仓，选择单品种，设置百分比保存；<br>3.分级持仓，对净值区间最大、最小值、日内持仓保证金占计划净值比例、隔夜持仓保证金占计划净值比例、单品种持仓保证金占计划净值比例设置；<br>4.对每一条添加的策略的目标止损值、止盈值、止盈仓位、止损仓位、策略开关设置；<br>5.资金设置，对各期货账户的账户总仓位上限、账户净持仓上限、账户可用资金比例、杠杆率、VAR风险率、触发止损值比例、加权日波动设置。</p>
 <h6 id="2-1-2-性能要求"><a href="#2-1-2-性能要求" class="headerlink" title="2.1.2. 性能要求"></a>2.1.2. 性能要求</h6><p>下单页面：<br>1.进入下单页面切换账号时个数据表切换时间小于0.3s，基本上达到点击完账号数据就变；<br>2.各个点击功能区域点击响应快速，切换效果平滑，不卡顿；<br>风控页面：<br>1.各风控值设定点击确定或保存后即生效。</p>
 <h5 id="2-2-运行环境"><a href="#2-2-运行环境" class="headerlink" title="2.2. 运行环境"></a>2.2. 运行环境</h5><p>前端：支持多系统平台运行，包括windows、Mac、linux。<br>后端：系统linux、windows。<br>网络：目前后台部署在华为云，因其不支持长城宽带，需要在电信宽带环境才能获取到后台数据。<br>硬件环境：部署后台的服务器最好是2核4G以上的配置；<br>具体的项目环境请参考SUNRISE生产环境搭建及部署：<br><a href="http://note.youdao.com/noteshare?id=ec0840cbe4c543273b84757aacbd14c8" target="_blank" rel="noopener">http://note.youdao.com/noteshare?id=ec0840cbe4c543273b84757aacbd14c8</a></p>
-<h5 id="2-3-基本设计概念和处理流程"><a href="#2-3-基本设计概念和处理流程" class="headerlink" title="2.3. 基本设计概念和处理流程"></a>2.3. 基本设计概念和处理流程</h5><p><img src="http://note.youdao.com/noteshare?id=ec0840cbe4c543273b84757aacbd14c8" alt=""></p>
+<h5 id="2-3-基本设计概念和处理流程"><a href="#2-3-基本设计概念和处理流程" class="headerlink" title="2.3. 基本设计概念和处理流程"></a>2.3. 基本设计概念和处理流程</h5><p><img src="https://ws1.sinaimg.cn/large/006tNc79ly1fnzxfa6qs4j30lw0vumz8.jpg" alt=""></p>
 <h5 id="2-4-结构"><a href="#2-4-结构" class="headerlink" title="2.4. 结构"></a>2.4. 结构</h5><p>前端：<br>项目框架参考蚂蚁金服Alain：<a href="https://cipchk.github.io/ng-alain/dashboard/v1" target="_blank" rel="noopener">https://cipchk.github.io/ng-alain/dashboard/v1</a><br>src中app文件夹内是前端各模块业务代码；assets是项目中用到的图片、声音、国际化字段存储文档；environments文件夹存放开发、测试、正式运行的各项参数；styles是存放前端样式；pagejson记录命令及引用包版本。<br>后端：<br>sanber_api中存放各接口interface；sanber_web中存放各service，业务代码主要放在serviceimpl中；sanber_lts_jobtracker是任务管理器的任务执行部；sanber_lts_admin是任务监控器。</p>
 <h5 id="2-5-功能需求与程序关系"><a href="#2-5-功能需求与程序关系" class="headerlink" title="2.5. 功能需求与程序关系"></a>2.5. 功能需求与程序关系</h5><table>
 <thead>
@@ -478,10 +479,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            文章目录
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            站点概览
           </li>
         </ul>
       
@@ -502,7 +503,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">1</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">日志</span>
                 </a>
               </div>
             
@@ -515,7 +516,7 @@
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">1</span>
-                  <span class="site-state-item-name">Tags</span>
+                  <span class="site-state-item-name">标签</span>
                 
               </div>
             
@@ -577,7 +578,7 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
 
 
 
@@ -585,7 +586,7 @@
 
 
 
-  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
 
 
 
