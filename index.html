@@ -229,6 +229,145 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/02/XTP-JNI/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="addplus9">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝樾博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/02/02/XTP-JNI/" itemprop="url">XTP_JNI</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-02T20:17:21+08:00">
+                2018-02-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>&emsp;&emsp;计划赶不上变化，策略平台从二期开始转为股票，券商因政策问题目前只有少部分券商开启了柜台接口，本文将对接其中一家中泰证券，中泰证券对量化交易支持力度蛮大，接口也基本符合我们要求。其中，风控功能在我们项目中使用Java语言，而中泰这边SDK都为c++版，于是需要实现跨语言对接。</p>
+<h3 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h3><p>1、<a href="https://xtp.zts.com.cn/download/sdk" target="_blank" rel="noopener">官网下载SDK</a> </p>
+<p>&emsp;&emsp;取出bin/include中的h文件备用,把他们放到新建文件夹sanber-base目录下</p>
+<p>2、<a href="http://www.swig.org/translations/chinese/index.html" target="_blank" rel="noopener">下载并安装Swig</a> </p>
+<p>&emsp;&emsp;SWIG是Simple Wrapper and Interface Generator的缩写，是一个帮助使用C或者C++编写的软件创建其他编语言的API的工具。</p>
+<p>3、使用Swig转换为Java<br>&emsp;&emsp;根据Swig规则，先编写xdptraderapi.i文件，如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">%module(directors=&quot;1&quot;) xtptraderapi </span><br><span class="line">%&#123; </span><br><span class="line">#include &quot;xtp_trader_api.h&quot;</span><br><span class="line">%&#125; </span><br><span class="line">%feature(&quot;director&quot;) TraderSpi; </span><br><span class="line">%include &quot;xtp_api_data_type.h&quot;</span><br><span class="line">%include &quot;xtp_api_struct.h&quot;</span><br><span class="line">%include &quot;xtp_api_struct_common.h&quot;</span><br><span class="line">%include &quot;xoms_api_struct.h&quot;</span><br><span class="line">%include &quot;xoms_api_fund_struct.h&quot;</span><br><span class="line">%include &quot;xtp_trader_api.h&quot;</span><br></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;进入sanber-base文件夹，新建src文件夹，开始转换：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swig -c++ -java -package sanber.xdptraderapi -outdir src -o xdptraderapi_wrap.cpp xdptraderapi.i</span><br></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;注意，因为中泰的SDK并非开源，只给了我们头文件，所以我们只是对接口进行了封装与转换，而并非把c++的接口变为java接口。</p>
+<p>4、生成jar包<br>&emsp;&emsp;进入src文件夹，执行javac编译上一步所生成的Java文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javac *.java</span><br></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;将编译好的class文件放到/sanber/xdptraderapi/<br>&emsp;&emsp;回到sanber-base目录下面，开始打jar<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jar cf xdptraderapi.jar sanber</span><br></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;得到jar包</p>
+<p>5、安装libiconv解决编码问题 </p>
+<p><a href="http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz" target="_blank" rel="noopener">下载libiconv</a> </p>
+<p>安装<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ ./configure --prefix=/usr/local</span><br><span class="line">$ make</span><br><span class="line">$ make install</span><br></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;发现configure报错，github搜索发现存在bug，按照如下修改srclib/stdio.in.h<br>将<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">_GL_WARN_ON_USE (gets, &quot;gets is a security hole - use fgets instead&quot;);</span><br></pre></td></tr></table></figure></p>
+<p>改为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#if defined(__GLIBC__) &amp;&amp; !defined(__UCLIBC__) &amp;&amp; !__GLIBC_PREREQ(2, 16)</span><br><span class="line">_GL_WARN_ON_USE (gets, &quot;gets is a security hole - use fgets instead&quot;);</span><br><span class="line">#endif</span><br></pre></td></tr></table></figure></p>
+<p>然后重新安装即可</p>
+<p>6、通过JNI重新编译so<br>&emsp;&emsp;取出sdk中bin/linux里面的so文件，复制到sanber-base目录下，创建makefile文件，内容如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">OBJS=xtptraderapi_wrap.o</span><br><span class="line">INCLUDE=-I./ -I$&#123;JAVA_HOME&#125;/include -I$&#123;JAVA_HOME&#125;/include/linux</span><br><span class="line">TARGET=libxtptraderapi_wrap.so</span><br><span class="line">CPPFLAG=-shared -fPIC</span><br><span class="line">CC=g++</span><br><span class="line">LDLIB=-liconv -L. -lxtptraderapi</span><br><span class="line">$(TARGET) : $(OBJS)</span><br><span class="line">	$(CC) $(CPPFLAG) $(INCLUDE) -o $(TARGET) $(OBJS) $(LDLIB)</span><br><span class="line">$(OBJS) : %.o : %.cpp</span><br><span class="line">	$(CC) -c -fPIC $(INCLUDE) $&lt; -o $@ </span><br><span class="line">clean:</span><br><span class="line">	-rm -f $(OBJS)</span><br><span class="line">	-rm -f $(TARGET)</span><br><span class="line">install:</span><br><span class="line">	cp $(TARGET) /usr/lib</span><br></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;然后执行make可得so文件，install安装到/usr/lib中，java端可调如下方法调用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">static&#123;</span><br><span class="line">        System.loadLibrary(&quot;xtptraderapi&quot;);</span><br><span class="line">        System.loadLibrary(&quot;xtptraderapi_wrap&quot;);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>大功告成！</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/02/Redis缓存说明文档/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -563,7 +702,7 @@
 <p>关闭：</p>
 <h5 id="11-报表统计-风控报表"><a href="#11-报表统计-风控报表" class="headerlink" title="11.报表统计-风控报表"></a>11.报表统计-风控报表</h5><p>任务名: SanberRiskReportJobRunner</p>
 <p>执行节点：sanber_lts_TaskTracker</p>
-<p>使用场景：项目启动时启动任务。<br>描述：账户风控报表，关键是利用持仓信息（List<xbctpposition> positionList = ctpRedisUtil.getCTPPosition(accountId);）和所有成交单（List<ctprspqrytrade> qryTradeList = ctpRedisUtil.getAllCTPTrade(accountId);）的信息。涉及类：XbCTPAccountInfo–CTP账号信息、XbReportRisk–风险控制类、XbAccount–账号信息类、CTPRspQryOrder–CTP报单、CTPRspQryOrder–CTP报单、XbFuturesInstrument–期货合约数据类</ctprspqrytrade></xbctpposition></p>
+<p>使用场景：项目启动时启动任务。<br>描述：账户风控报表，关键是利用持仓信息（List<xbctpposition> positionList = ctpRedisUtil.getCTPPosition(accountId);）和所有成交单（List<ctprspqrytrade> qryTradeList = ctpRedisUtil.getAllCTPTrade(accountId);）的信息。<br>涉及类：XbCTPAccountInfo–CTP账号信息、XbReportRisk–风险控制类、XbAccount–账号信息类、CTPRspQryOrder–CTP报单、CTPRspQryOrder–CTP报单、XbFuturesInstrument–期货合约数据类</ctprspqrytrade></xbctpposition></p>
 <p>代码位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sanber_web模块--&gt;src--&gt;main--&gt;java--&gt;lts--&gt;taskTracker--&gt;ctpreportjobrunner--&gt;SanberRiskReportJobRunner</span><br></pre></td></tr></table></figure></p>
 <p>关联数据库:交易日期–xb_futures_trade_date、风险控制报表–xb_report_risk、交易报表–xb_report_trade、<br>查询字段:<br>循环执行间隔:<br>实际业务哪些功能用到了该任务: 交易报表。</p>
 <p>调用参考：</p>
@@ -1111,7 +1250,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1124,7 +1263,7 @@
               
               <div class="site-state-item site-state-tags">
                 
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">标签</span>
                 
               </div>

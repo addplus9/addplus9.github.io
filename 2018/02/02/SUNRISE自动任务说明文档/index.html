@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="蓝樾博客">
 <meta property="og:description" content="1.    CTP账号信息查询任务任务名: CTPAccountQryJobRunner 执行节点：sanber_lts_TaskTracker 使用场景： 新建账号时开启任务,修改账号时更新任务 描述：为SUNRISE新建基金账户时，需要一个在交易所已经建好的账户，将该账户号填入SUNRISE系统后，SUNRISE将会向交易所提供的接口查询该账户相关信息–CThostFtdcTradingAcc">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-02-02T09:40:42.684Z">
+<meta property="og:updated_time" content="2018-02-02T09:59:07.690Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SUNRISE自动任务说明文档">
 <meta name="twitter:description" content="1.    CTP账号信息查询任务任务名: CTPAccountQryJobRunner 执行节点：sanber_lts_TaskTracker 使用场景： 新建账号时开启任务,修改账号时更新任务 描述：为SUNRISE新建基金账户时，需要一个在交易所已经建好的账户，将该账户号填入SUNRISE系统后，SUNRISE将会向交易所提供的接口查询该账户相关信息–CThostFtdcTradingAcc">
@@ -388,7 +388,7 @@
 <p>关闭：</p>
 <h5 id="11-报表统计-风控报表"><a href="#11-报表统计-风控报表" class="headerlink" title="11.报表统计-风控报表"></a>11.报表统计-风控报表</h5><p>任务名: SanberRiskReportJobRunner</p>
 <p>执行节点：sanber_lts_TaskTracker</p>
-<p>使用场景：项目启动时启动任务。<br>描述：账户风控报表，关键是利用持仓信息（List<xbctpposition> positionList = ctpRedisUtil.getCTPPosition(accountId);）和所有成交单（List<ctprspqrytrade> qryTradeList = ctpRedisUtil.getAllCTPTrade(accountId);）的信息。涉及类：XbCTPAccountInfo–CTP账号信息、XbReportRisk–风险控制类、XbAccount–账号信息类、CTPRspQryOrder–CTP报单、CTPRspQryOrder–CTP报单、XbFuturesInstrument–期货合约数据类</ctprspqrytrade></xbctpposition></p>
+<p>使用场景：项目启动时启动任务。<br>描述：账户风控报表，关键是利用持仓信息（List<xbctpposition> positionList = ctpRedisUtil.getCTPPosition(accountId);）和所有成交单（List<ctprspqrytrade> qryTradeList = ctpRedisUtil.getAllCTPTrade(accountId);）的信息。<br>涉及类：XbCTPAccountInfo–CTP账号信息、XbReportRisk–风险控制类、XbAccount–账号信息类、CTPRspQryOrder–CTP报单、CTPRspQryOrder–CTP报单、XbFuturesInstrument–期货合约数据类</ctprspqrytrade></xbctpposition></p>
 <p>代码位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sanber_web模块--&gt;src--&gt;main--&gt;java--&gt;lts--&gt;taskTracker--&gt;ctpreportjobrunner--&gt;SanberRiskReportJobRunner</span><br></pre></td></tr></table></figure></p>
 <p>关联数据库:交易日期–xb_futures_trade_date、风险控制报表–xb_report_risk、交易报表–xb_report_trade、<br>查询字段:<br>循环执行间隔:<br>实际业务哪些功能用到了该任务: 交易报表。</p>
 <p>调用参考：</p>
@@ -520,7 +520,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -533,7 +533,7 @@
               
               <div class="site-state-item site-state-tags">
                 
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">标签</span>
                 
               </div>
